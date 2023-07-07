@@ -15,18 +15,59 @@ create table if not exists `user`(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table if not exists `encyclopedia` (
-    `eid` INT UNSIGNED AUTO_INCREMENT,
-    `title` VARCHAR(200) NOT NULL,
-    `create_date` DATE,
-    `createrid` INT UNSIGNED,
-    `lasteditorid` INT UNSIGNED,
+    `eid` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `category` INT UNSIGNED,
-    `content` LONGTEXT,
+    `permission` TINYINT NOT NULL,
     PRIMARY KEY ( eid )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+create table if not exists `encyclopedia_content` (
+    `e_content_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `language` CHAR(50) NOT NULL,
+    `eid` INT UNSIGNED NOT NULL,
+    `title` VARCHAR(200) NOT NULL,
+    `describe` VARCHAR(200) NOT NULL,
+    `create_date` DATE NOT NULL,
+    `createrid` INT UNSIGNED NOT NULL,
+    `lasteditorid` INT UNSIGNED NOT NULL,
+    `content` LONGTEXT,
+    `permission` TINYINT NOT NULL,
+    PRIMARY KEY ( e_content_id ),
+    unique key (`language`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 create table if not exists `encyclopedia_contribution` (
-    `contru_id` INT UNSIGNED AUTO_INCREMENT,
-    `eid` INT UNSIGNED,
-    `userid` INT UNSIGNED
+    `contru_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `eid` INT UNSIGNED NOT NULL,
+    `userid` INT UNSIGNED NOT NULL,
+    PRIMARY KEY ( counru_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `user_groups` (
+    `user_group_id` INT UNSIGNED AUTO_INCREMENT,
+    `user_group_name` VARCHAR(200),
+    `permission` TINYINT,
+    PRIMARY KEY ( user_group_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `category` (
+    `cat_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `cat_name` VARCHAR(100) NOT NULL,
+    `creater` INT UNSIGNED NOT NULL,
+    PRIMARY KEY ( cat_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `comment` (
+    `comm_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `eid` INT UNSIGNED NOT NULL,
+    `uid` INT UNSIGNED NOT NULL,
+    `content` LONGTEXT NOT NULL,
+    PRIMARY KEY ( comm_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `blockip` (
+    `record_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `record_value` VARCHAR(100) NOT NULL,
+    `recore_date` DATE NOT NULL,
+    PRIMARY KEY ( record_id )
 )
