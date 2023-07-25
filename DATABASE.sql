@@ -97,4 +97,4 @@ create table if not exists `language`(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert into language (language_name)
-    values ("简体中文"),("繁體中文"),("English"),("日本語"),("한국어"),("Русский")
+    values ("简体中文"),("繁體中文"),("English"),("日本語"),("한국어"),("Русский");
