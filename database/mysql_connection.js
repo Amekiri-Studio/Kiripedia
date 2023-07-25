@@ -18,9 +18,19 @@ var isConnection = false;
 
 function sqlConnect() {
     if (!isConnection) {
-        connection.connect();
-        isConnection = true;
+        connection.connect((err) => {
+            if (err) {
+                console.log(err.message);
+            }
+            else {
+                isConnection = true;
+            }
+        });
     }
 }
 
-module.exports = {sqlConnect}
+function getConnectionStatus() {
+    return isConnection;
+}
+
+module.exports = {sqlConnect,connection,getConnectionStatus}
