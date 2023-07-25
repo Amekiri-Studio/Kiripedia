@@ -8,7 +8,7 @@ create table if not exists `user`(
     `password` VARCHAR(200) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
     `avatar` VARCHAR(100),
-    `register_date` DATE,
+    `register_date` DATETIME,
     `user_belong_groups` INT UNSIGNED,
     `user_status` TINYINT,
     PRIMARY KEY ( userid )
@@ -18,16 +18,17 @@ create table if not exists `encyclopedia` (
     `eid` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `category` INT UNSIGNED,
     `permission` TINYINT NOT NULL,
+    `redirect_link` VARCHAR(100),
     PRIMARY KEY ( eid )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table if not exists `encyclopedia_content` (
     `e_content_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
-    `language` CHAR(50) NOT NULL,
+    `language` INT UNSIGNED NOT NULL,
     `eid` INT UNSIGNED NOT NULL,
     `title` VARCHAR(200) NOT NULL,
     `describe` VARCHAR(200) NOT NULL,
-    `create_date` DATE NOT NULL,
+    `create_date` DATETIME NOT NULL,
     `createrid` INT UNSIGNED NOT NULL,
     `lasteditorid` INT UNSIGNED NOT NULL,
     `content` LONGTEXT,
@@ -40,6 +41,7 @@ create table if not exists `encyclopedia_contribution` (
     `contru_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `eid` INT UNSIGNED NOT NULL,
     `userid` INT UNSIGNED NOT NULL,
+    `language` INT UNSIGNED,
     PRIMARY KEY ( counru_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -68,6 +70,28 @@ create table if not exists `comment` (
 create table if not exists `blockip` (
     `record_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `record_value` VARCHAR(100) NOT NULL,
-    `recore_date` DATE NOT NULL,
+    `recore_date` DATETIME NOT NULL,
     PRIMARY KEY ( record_id )
-)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `change_logs` (
+    `log_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `log_type` TINYINT NOT NULL,
+    `old` LONGTEXT,
+    `new` LONGTEXT,
+    PRIMARY KEY ( log_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `user_login_record`(
+    `log_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `userid` INT UNSIGNED NOT NULL,
+    `loginip` VARCHAR(100) NOT NULL,
+    `logindate` DATETIME,
+    PRIMARY KEY ( log_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table if not exists `language`(
+    `language_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `language_name` VARCHAR(100),
+    PRIMARY KEY ( language_id )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
