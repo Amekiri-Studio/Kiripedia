@@ -1,10 +1,18 @@
-var mysql = require("mysql");
-var config = require("../config/mysql");
+var mysql;
+var config = require("../config/config");
+
+if (config.mysql_type === 2) {
+    mysql = require("mysql2");
+}
+else {
+    mysql = require("mysql");
+}
+var myconfig = require("../config/mysql");
 var connection = mysql.createConnection({
-    host:   config.host,
-    user:   config.user,
-    password: config.password,
-    database: config.database
+    host:   myconfig.host,
+    user:   myconfig.user,
+    password: myconfig.password,
+    database: myconfig.database
 })
 var isConnection = false;
 

@@ -4,6 +4,10 @@ const website_name = "Kiripedia";
 // https://static.amekiri.com/images/logo.svg
 const website_logo = "/images/logo.png";
 
+// If you are using mysql8, please set this value to 2 because mysql has changed the encryption mode to caching_sha2_password
+// or change the mysql encryption mode to mysql_native_password instead caching_sha2_password
+const mysql_type = 2;
+
 // If your website is using CDN that only can get CDN's IP instead user's ip, please set this value to "true"
 // And please set some headers on your proxy server, suck like Nginx:
 /*
@@ -16,4 +20,4 @@ const withCDN = false;
 
 const mysql = require('mysql');
 
-module.exports = {website_name, website_logo, withCDN, mysql}
+module.exports = {website_name, website_logo, withCDN, mysql, mysql_type}
