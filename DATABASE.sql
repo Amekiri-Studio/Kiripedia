@@ -8,7 +8,7 @@ create table if not exists `user`(
     `password` VARCHAR(200) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
     `avatar` VARCHAR(100),
-    `register_date` DATETIME,
+    `register_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `user_belong_groups` INT UNSIGNED,
     `user_status` TINYINT,
     PRIMARY KEY ( userid )
@@ -97,4 +97,7 @@ create table if not exists `language`(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert into language (language_name)
-    values ("简体中文"),("繁體中文"),("English"),("日本語"),("한국어"),("Русский");
+    values ('简体中文'),('繁體中文'),('English'),('日本語'),('한국어'),('Русский');
+
+insert into user_groups (user_group_name,permission)
+    values ('root',31);
