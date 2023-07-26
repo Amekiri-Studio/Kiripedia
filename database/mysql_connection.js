@@ -23,6 +23,7 @@ function sqlConnect() {
                 console.log(err.message);
             }
             else {
+                console.log("Connected to mysql");
                 isConnection = true;
             }
         });
