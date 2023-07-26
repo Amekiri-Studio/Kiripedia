@@ -5,6 +5,7 @@ use kiripedia;
 create table if not exists `user`(
     `userid` INT UNSIGNED AUTO_INCREMENT,
     `username` VARCHAR(100) NOT NULL,
+    `nickname` VARCHAR(200) NOT NULL,
     `password` VARCHAR(200) NOT NULL,
     `email` VARCHAR(100) NOT NULL,
     `avatar` VARCHAR(100),

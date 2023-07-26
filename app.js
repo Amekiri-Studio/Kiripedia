@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mysqlConnection = require('./database/mysql_connection');
+var redisConnection = require('./database/redis/redis_connection');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -42,5 +43,6 @@ app.use(function(err, req, res, next) {
 });
 
 mysqlConnection.sqlConnect();
+redisConnection.connectRedis();
 
 module.exports = app;
