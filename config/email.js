@@ -4,7 +4,7 @@
 const host = "smtp.ym.163.com";
 
 // smtp email port
-const port = 465;
+const port = 994;
 
 // using SSL
 const secure = true;
@@ -14,7 +14,7 @@ const secure = true;
 const user = "noreply@xn--ep5asb.com";
 const password = "87654321";
 
-const from = "YourCompanyName <youremail@email.com>";
+const from = `YourCompanyName <${user}>`;
 
 module.exports = {
     host,

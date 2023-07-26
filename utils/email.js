@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 function sendMail(to, subject, html, callback) {
     var transporter = nodemailer.createTransport({
         host: config.host,
-        port: 465,
+        port: config.port,
         secure: config.secure,
         auth: {
             user: config.user,

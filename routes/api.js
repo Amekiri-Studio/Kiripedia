@@ -3,6 +3,7 @@ const config = require("../config/config");
 const {sqlConnect} = require("../database/mysql_connection");
 var router = express.Router();
 var user = require('../database/user');
+const { sendMail } = require("../utils/email");
 
 // Root api path
 router.get('/',function (req,res) {
@@ -32,6 +33,13 @@ router.post('/user/add',function (req,res){
 
 router.get("/mysqltest",function (req,res) {
     sqlConnect();
+})
+
+router.get("/emailtest", function(req,res) {
+    sendMail("reiwa4@126.com","TEST","test",(e,i) => {
+        console.log(e);
+        console.log(i);
+    });
 })
 
 module.exports = router;
