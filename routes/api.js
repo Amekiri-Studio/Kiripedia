@@ -28,32 +28,45 @@ router.post('/user/add',function (req,res){
     var email = req.body.email;
     var groups = req.body.groups;
     var code = req.body.code;
-    user.createUser(username,nickname,password,email,groups,(result) => {
-        res.json(result);
+    verifyVCodeForEmail(email, val => {
+        if(val === code) {
+            user.createUser(username,nickname,password,email,groups,(result) => {
+                res.json({
+                    code:0,
+                    message:'User create successfully',
+                    data: {
+                        username:username,
+                        nickname:nickname,
+                        email:email,
+                        group:groups
+                    }
+                });
+            })
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'Verification code error'
+            });
+        }
     })
+    
 })
 
-router.post('/email/verify', function (req, res) {
+router.post('/user/login', function (req, res) {
 
 })
 
-router.get("/mysqltest",function (req,res) {
-    sqlConnect();
-})
-
-router.get("/emailtest", function(req,res) {
-    sendMail("reiwa4@126.com","TEST",getEmailTemp('12345'),(e,i) => {
-        console.log(e);
-        console.log(i);
-        res.send(i);
-    });
-})
-
-router.get('/redistest', function(req,res) {
-    getNewVCodeForEmail('test@test.com');
-    verifyVCodeForEmail('abc', val => {
-        res.send(val);
-    });
+router.post('/email/verify/code', function (req, res) {
+    let isLogin = false;
+    var email;
+    if (!isLogin) {
+        email = req.body.email;
+        let code = getNewVCodeForEmail(email);
+        sendMail(email,"Kiripedia 验证码",getEmailTemp(code), (e, i) => {
+            res.json(i);
+        });
+    }
 })
 
 module.exports = router;

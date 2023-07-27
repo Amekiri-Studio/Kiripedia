@@ -16,11 +16,14 @@ const password = "87654321";
 
 const from = `YourCompanyName <${user}>`;
 
+const theme = "Kiripedia 验证码"
+
 module.exports = {
     host,
     port,
     secure,
     user,
     password,
-    from
+    from,
+    theme
 }
