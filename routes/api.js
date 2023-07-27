@@ -5,6 +5,7 @@ var router = express.Router();
 var user = require('../database/user');
 const { sendMail } = require("../utils/email");
 const { getNewVCodeForEmail, verifyVCodeForEmail } = require("../utils/verify/code");
+const { getEmailTemp } = require('../utils/emailtemp');
 
 // Root api path
 router.get('/',function (req,res) {
@@ -32,14 +33,19 @@ router.post('/user/add',function (req,res){
     })
 })
 
+router.post('/email/verify', function (req, res) {
+
+})
+
 router.get("/mysqltest",function (req,res) {
     sqlConnect();
 })
 
 router.get("/emailtest", function(req,res) {
-    sendMail("reiwa4@126.com","TEST","test",(e,i) => {
+    sendMail("reiwa4@126.com","TEST",getEmailTemp('12345'),(e,i) => {
         console.log(e);
         console.log(i);
+        res.send(i);
     });
 })
 
