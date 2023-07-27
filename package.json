@@ -16,6 +16,7 @@
     "mysql2": "^3.5.2",
     "nodemailer": "^6.9.4",
     "pug": "2.0.0-beta11",
-    "redis": "^4.6.7"
+    "redis": "^4.6.7",
+    "string-random": "^0.1.3"
   }
 }

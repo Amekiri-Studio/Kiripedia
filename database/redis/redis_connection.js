@@ -27,18 +27,20 @@ function setKeyValue(key, value) {
     redisClient.set(key, value);
 }
 
-function getKeyValue(key, callack) {
-    client.get(key, (err, result) => {
-        if (err) {
-            console.error("Error retrieving data:", err);
-        } else {
-            callack(result);
-        }
+function setExpire(key, time) {
+    redisClient.expire(key, time);
+}
+
+function getKeyValue(key, callback) {
+    redisClient.get(key, (err, v) => {
+        console.log(err,v);
+        // callback(err, result);
     });
 }
 
 module.exports = {
     connectRedis,
     setKeyValue,
-    getKeyValue
+    getKeyValue,
+    setExpire
 }

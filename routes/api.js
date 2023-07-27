@@ -4,6 +4,7 @@ const {sqlConnect} = require("../database/mysql_connection");
 var router = express.Router();
 var user = require('../database/user');
 const { sendMail } = require("../utils/email");
+const { getNewVCodeForEmail, verifyVCodeForEmail } = require("../utils/verify/code");
 
 // Root api path
 router.get('/',function (req,res) {
@@ -40,6 +41,10 @@ router.get("/emailtest", function(req,res) {
         console.log(e);
         console.log(i);
     });
+})
+
+router.get('/redistest', function(req,res) {
+    getNewVCodeForEmail('test@test.com');
 })
 
 module.exports = router;
