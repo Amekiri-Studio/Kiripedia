@@ -45,6 +45,4 @@ app.use(function(err, req, res, next) {
 mysqlConnection.sqlConnect();
 redisConnection.connectRedis();
 
-redisConnection.getKeyValue('test@test.com');
-
 module.exports = app;

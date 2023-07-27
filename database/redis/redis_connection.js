@@ -32,9 +32,8 @@ function setExpire(key, time) {
 }
 
 function getKeyValue(key, callback) {
-    redisClient.get(key, (err, v) => {
-        console.log(err,v);
-        // callback(err, result);
+    redisClient.get(key).then(val => {
+        callback(val);
     });
 }
 

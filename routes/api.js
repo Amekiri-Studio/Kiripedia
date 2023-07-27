@@ -45,6 +45,9 @@ router.get("/emailtest", function(req,res) {
 
 router.get('/redistest', function(req,res) {
     getNewVCodeForEmail('test@test.com');
+    verifyVCodeForEmail('abc', val => {
+        res.send(val);
+    });
 })
 
 module.exports = router;
