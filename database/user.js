@@ -17,6 +17,23 @@ function createUser(username,nickname,password,email,group,callback) {
     });
 }
 
+function queryExistsUsername(username, callback) {
+    if (!mysql.getConnectionStatus()) {
+        mysql.sqlConnect();
+    }
+    let querySql = "SELECT * FROM user where username=?";
+    let params = [username];
+
+    mysql.connection.query(querySql,params,(err, results, fields) => {
+        if (err) {
+            console.log(err.message);
+            return;
+        }
+        callback(results);
+    });
+}
+
 module.exports = {
-    createUser
+    createUser,
+    queryExistsUsername
 }
