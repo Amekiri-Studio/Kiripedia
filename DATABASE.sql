@@ -102,3 +102,9 @@ insert into language (language_name)
 
 insert into user_groups (user_group_name,permission)
     values ('root',31);
+
+insert into user_groups (user_group_name,permission)
+    values ('admin',15);
+
+insert into user_groups (user_group_name,permission)
+    values ('user',1);

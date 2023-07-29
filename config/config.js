@@ -20,4 +20,6 @@ const withCDN = false;
 
 const mysql = require('mysql');
 
-module.exports = {website_name, website_logo, withCDN, mysql, mysql_type}
+const token_secret = "MYTOKENSECRET";
+
+module.exports = {website_name, website_logo, withCDN, mysql, mysql_type, token_secret}

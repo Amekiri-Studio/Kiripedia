@@ -6,6 +6,8 @@ var user = require('../database/user');
 const { sendMail } = require("../utils/email");
 const { getNewVCodeForEmail, verifyVCodeForEmail } = require("../utils/verify/code");
 const { getEmailTemp } = require('../utils/emailtemp');
+var email_config = require("../config/email");
+
 
 // Root api path
 router.get('/',function (req,res) {
@@ -67,7 +69,10 @@ router.post('/user/add',function (req,res){
 })
 
 router.post('/user/login', function (req, res) {
-
+    let token = req.cookies.token;
+    if(token) {
+        let token = req.body.token;
+    }
 })
 
 router.post('/email/verify/code', function (req, res) {
@@ -76,7 +81,7 @@ router.post('/email/verify/code', function (req, res) {
     if (!isLogin) {
         email = req.body.email;
         let code = getNewVCodeForEmail(email);
-        sendMail(email,"Kiripedia 验证码",getEmailTemp(code), (e, i) => {
+        sendMail(email,email_config.subject,getEmailTemp(code), (e, i) => {
             res.json(i);
         });
     }

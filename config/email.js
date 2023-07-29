@@ -16,7 +16,7 @@ const password = "87654321";
 
 const from = `YourCompanyName <${user}>`;
 
-const theme = "Kiripedia 验证码"
+const subject = "Kiripedia 验证码"
 
 module.exports = {
     host,
@@ -25,5 +25,5 @@ module.exports = {
     user,
     password,
     from,
-    theme
+    subject
 }
