@@ -31,29 +31,30 @@ router.post('/user/add',function (req,res){
     
     verifyVCodeForEmail(email, val => {
         if(val === code) {
-            user.queryExistsUsername(username,result => {
-                if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-                    user.createUser(username,nickname,password,email,groups,(result) => {
-                        res.json({
-                            code:0,
-                            message:'User create successfully',
-                            data: {
-                                username:username,
-                                nickname:nickname,
-                                email:email,
-                                group:groups
-                            }
-                        });
-                    })
-                }
-                else {
+            user.checkInfoIsLegal(username, email, () => {
+                res.json({
+                            code:-1,
+                            message:'Username does exists'
+                        })
+            }, () => {
+                res.json({
+                    code:-1,
+                    message:'Email does exists'
+                })
+            }, () => {
+                user.createUser(username,nickname,password,email,groups,(result) => {
                     res.json({
-                        code:-1,
-                        message:'Username does exists'
-                    })
-                }
-            })
-            
+                        code:0,
+                        message:'User create successfully',
+                        data: {
+                            username:username,
+                            nickname:nickname,
+                            email:email,
+                            group:groups
+                        }
+                    });
+                })
+            });
         }
         else {
             res.json({
