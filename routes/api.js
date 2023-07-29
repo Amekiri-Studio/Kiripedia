@@ -33,9 +33,9 @@ router.post('/user/add',function (req,res){
         if(val === code) {
             user.checkInfoIsLegal(username, email, () => {
                 res.json({
-                            code:-1,
-                            message:'Username does exists'
-                        })
+                    code:-1,
+                    message:'Username does exists'
+                })
             }, () => {
                 res.json({
                     code:-1,
