@@ -64,9 +64,30 @@ function checkInfoIsLegal(username, email, uecallback, eecallback, callback) {
     });
 }
 
+function userLogin(username, password, callback) {
+    mysql.sqlConnect();
+    
+    let querySql = "SELECT * FROM user where username=? and password=?"
+    let params = [username, hash_pwd(username,password)];
+    
+    mysql.connection.query(querySql, params, (err, result, fields) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+            callback(false);
+        }
+        else {
+            callback(true, result);
+        }
+    });
+}
+
 module.exports = {
     createUser,
     queryExistsUsername,
     queryExistsEmail,
-    checkInfoIsLegal
+    checkInfoIsLegal,
+    userLogin
 }

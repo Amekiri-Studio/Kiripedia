@@ -7,6 +7,8 @@ const { sendMail } = require("../utils/email");
 const { getNewVCodeForEmail, verifyVCodeForEmail } = require("../utils/verify/code");
 const { getEmailTemp } = require('../utils/emailtemp');
 var email_config = require("../config/email");
+const { getToken, verifyToken } = require("../utils/verify/token");
+const { hash_pwd } = require("../utils/password_hash");
 
 
 // Root api path
@@ -32,7 +34,7 @@ router.post('/user/add',function (req,res){
     var code = req.body.code;
     
     verifyVCodeForEmail(email, val => {
-        if(val === code) {
+        if(val === code.toUpperCase()) {
             user.checkInfoIsLegal(username, email, () => {
                 res.json({
                     code:-1,
@@ -68,11 +70,60 @@ router.post('/user/add',function (req,res){
     
 })
 
+// Function user login and return a token
 router.post('/user/login', function (req, res) {
     let token = req.cookies.token;
-    if(token) {
-        let token = req.body.token;
+    if(!token) {
+        let username = req.body.username;
+        let password = req.body.password;
+        user.userLogin(username, password, function(b, r) {
+            if (b) {
+                token = getToken(r[0].userid,r[0].username,r[0].password);
+                res.cookie("token", token, {
+                    domain:config.cookie_domain,
+                    maxAge:config.cookie_max_age
+                });
+                res.json({
+                    code:0,
+                    message:'Login successfully',
+                    data:{
+                        uid:r[0].userid,
+                        username:r[0].username,
+                        token:token
+                     }
+                });
+            }
+            else {
+                res.json({
+                    code:-1,
+                    message:'Username or password incorrect'
+                });
+            }
+        });
     }
+    else {
+        res.json({
+            code:-1,
+            message:'You are logged in'
+        });
+    }
+})
+
+router.get("/user/login_status", function(req, res) {
+    let token = req.cookies.token;
+    if (!token) {
+        token = req.query.token;
+        info = verifyToken(token, config.token_secret);
+        res.json(info);
+    }
+    else {
+        info = verifyToken(token, config.token_secret);
+        res.json(info);
+    }
+})
+
+router.get("/user/logout", function(req, res) {
+
 })
 
 router.post('/email/verify/code', function (req, res) {

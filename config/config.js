@@ -20,6 +20,10 @@ const withCDN = false;
 
 const mysql = require('mysql');
 
+const cookie_max_age = 360000;
+
+const cookie_domain = "";
+
 const token_secret = "MYTOKENSECRET";
 
-module.exports = {website_name, website_logo, withCDN, mysql, mysql_type, token_secret}
+module.exports = {website_name, website_logo, withCDN, mysql, mysql_type, token_secret, cookie_max_age, cookie_domain}
