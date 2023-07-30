@@ -10,7 +10,6 @@ var email_config = require("../config/email");
 const { getToken, verifyToken } = require("../utils/verify/token");
 const { hash_pwd } = require("../utils/password_hash");
 
-
 // Root api path
 router.get('/',function (req,res) {
 
@@ -113,8 +112,26 @@ router.get("/user/login_status", function(req, res) {
     let token = req.cookies.token;
     if (!token) {
         token = req.query.token;
+        if (!token) {
+            res.json({
+                code:-1,
+                message:'User not login or not token provide'
+            });
+        }
         info = verifyToken(token, config.token_secret);
-        res.json(info);
+        user.checkUserLoginInvaild(info.username, info.password, (b, r) => {
+            console.log(b);
+            if (b) {
+                res.json(info);
+            }
+            else {
+                res.json({
+                    code:-1,
+                    message:'token invaild'
+                });
+            }
+        });
+        
     }
     else {
         info = verifyToken(token, config.token_secret);
@@ -122,8 +139,26 @@ router.get("/user/login_status", function(req, res) {
     }
 })
 
-router.get("/user/logout", function(req, res) {
+router.get("/user/query/username", function (req, res) {
+    let username = req.query.value;
+    user.queryExistsUsername(username, r => {
+        res.json(r);
+    });
+})
 
+router.get("/user/query/email", function (req, res) {
+    let email = req.query.value;
+    user.queryExistsEmail(email,r => {
+        res.json(r);
+    });
+})
+
+router.get("/user/logout", function(req, res) {
+    res.clearCookie('token');
+    res.json({
+        code:0,
+        message:'Log out successfully, please remove token on local storage'
+    });
 })
 
 router.post('/email/verify/code', function (req, res) {
