@@ -118,8 +118,8 @@ router.get("/user/login_status", function(req, res) {
                 message:'User not login or not token provide'
             });
         }
-        info = verifyToken(token, config.token_secret);
-        user.checkUserLoginInvaild(info.username, info.password, (b, r) => {
+        let info = verifyToken(token, config.token_secret);
+        user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
             console.log(b);
             if (b) {
                 res.json(info);

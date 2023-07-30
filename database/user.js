@@ -84,7 +84,7 @@ function userLogin(username, password, callback) {
     });
 }
 
-function checkUserLoginInvaild(username, password_hash, callback) {
+function checkUserLoginInvalid(username, password_hash, callback) {
     mysql.sqlConnect();
 
     let querySql = "SELECT * FROM user where username=? and password=?"
@@ -110,5 +110,5 @@ module.exports = {
     queryExistsEmail,
     checkInfoIsLegal,
     userLogin,
-    checkUserLoginInvaild
+    checkUserLoginInvalid
 }
