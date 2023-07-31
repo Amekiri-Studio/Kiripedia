@@ -8,8 +8,14 @@ function getNewVCodeForEmail(email) {
     return code;
 }
 
-function verifyVCodeForEmail(email, callback) {
-    redisConn.getKeyValue(email, callback);
+function verifyVCodeForEmail(email, code, callback) {
+    redisConn.getKeyValue(email, val => {
+        let b = code.toUpperCase() === val.toUpperCase();
+        if (b) {
+            redisConn.delKeyValue(email);
+        }
+        callback(b);
+    });
 }
 
 module.exports = {

@@ -37,9 +37,14 @@ function getKeyValue(key, callback) {
     });
 }
 
+function delKeyValue(key) {
+    redisClient.del(key);
+}
+
 module.exports = {
     connectRedis,
     setKeyValue,
     getKeyValue,
+    delKeyValue,
     setExpire
 }
