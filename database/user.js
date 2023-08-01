@@ -124,7 +124,7 @@ function checkUsernameAndEmailMatch(username, email, callback) {
     })
 }
 
-function alterUserInfo(uid, type, content, callback) {
+function alterUserInfo(uid, type, content, callback, option) {
     mysql.sqlConnect();
     let updateSql;
 
@@ -140,7 +140,7 @@ function alterUserInfo(uid, type, content, callback) {
 
     let params;
     if (type === 'password') {
-        params = [hash_pwd(content), uid];
+        params = [hash_pwd(option.username,content), uid];
     }
     else {
         params = [content, uid];

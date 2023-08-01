@@ -131,7 +131,6 @@ router.get("/user/query/email", function (req, res) {
 
 router.post("/user/alter/email", function (req, res) {
     let token = req.cookies.token;
-    console.log(token);
     
     if (!token) {
         token = req.body.token;
@@ -190,7 +189,80 @@ router.post("/user/alter/email", function (req, res) {
 })
 
 router.post("/user/alter/password", function (req, res) {
-    
+    let token = req.cookies.token;
+    if (!token) {
+        token = req.body.token;
+        if (!token) {
+            res.json({
+                code:-1,
+                message:"user not login or not token provided"
+            });
+            return;
+        }
+    }
+    let info = verifyToken(token, config.token_secret);
+    let authcode = req.body.authcode;
+    let newPassword = req.body.password;
+    user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
+        if (b) {
+            verifyAuthCode(info.username, authcode, b => {
+                if (b) {
+                    user.alterUserInfo(info.uid, 'password', newPassword, result => {
+                        res.json({
+                            code:0,
+                            message:'alter password successfully'
+                        });
+                    }, {
+                        username:info.username
+                    });
+                }
+                else {
+                    res.json({
+                        code:-1,
+                        message:'authorization code incorrect'
+                    });
+                }
+            });
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'token invalid'
+            })
+        }
+    });
+})
+
+router.post("/uset/alter/nickname", function (req, res) {
+    let token = req.cookies.token;
+    if (!token) {
+        token = req.body.token;
+        if (!token) {
+            res.json({
+                code:-1,
+                message:"user not login or not token provided"
+            });
+            return;
+        }
+    }
+    let info = verifyToken(token, config.token_secret);
+    let nickname = req.body.nickname;
+    user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
+        if (b) {
+            user.alterUserInfo(info.uid, 'nickname', nickname, result => {
+                res.json({
+                    code:0,
+                    message:'alter nickname successfully'
+                });
+            });
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'token invalid'
+            })
+        }
+    });
 })
 
 router.post("/user/verify/code", function (req, res) {
@@ -277,7 +349,6 @@ function doLogin(username, password, req, res) {
 
 function doTokenCheckAndResponseToken(info, req, res) {
     user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-        console.log(b);
         if (b) {
             res.json(info);
         }

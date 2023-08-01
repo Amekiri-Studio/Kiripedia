@@ -224,9 +224,56 @@
     "/api/user/alter/password": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "example": "any"
+                },
+                "authcode": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/uset/alter/nickname": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "example": "any"
+                },
+                "nickname": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
