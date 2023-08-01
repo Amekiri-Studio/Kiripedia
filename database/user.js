@@ -155,6 +155,20 @@ function alterUserInfo(uid, type, content, callback) {
     });
 }
 
+function queryUserId(userid, callback) {
+    mysql.sqlConnect();
+    let querySql = "SELECT * FROM user where userid=?";
+    let params = [userid];
+
+    mysql.connection.query(querySql, params, (err, result, fields) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        callback(result);
+    })
+}
+
 module.exports = {
     createUser,
     queryExistsUsername,
@@ -163,5 +177,6 @@ module.exports = {
     userLogin,
     checkUserLoginInvalid,
     checkUsernameAndEmailMatch,
-    alterUserInfo
+    alterUserInfo,
+    queryUserId
 }
