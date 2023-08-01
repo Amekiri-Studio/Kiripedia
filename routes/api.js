@@ -9,7 +9,7 @@ const { getEmailTemp } = require('../utils/emailtemp');
 var email_config = require("../config/email");
 const { getToken, verifyToken } = require("../utils/verify/token");
 const { hash_pwd } = require("../utils/password_hash");
-const { verifyAuthCode } = require("../utils/verify/authcode");
+const { verifyAuthCode, getNewAuthCode } = require("../utils/verify/authcode");
 
 // Root api path
 router.get('/',function (req,res) {
@@ -151,7 +151,15 @@ router.post("/user/alter/email", function (req, res) {
                 if (b) {
                     verifyVCodeForEmail(email, code, b => {
                         if (b) {
-
+                            user.alterUserInfo(info.uid, 'email', email, result => {
+                                res.json({
+                                    code:0,
+                                    message:'email alter successfully',
+                                    data:{
+                                        email:email
+                                    }
+                                })
+                            });
                         }
                         else {
                             res.json({
@@ -185,6 +193,36 @@ router.post("/user/alter/password", function (req, res) {
 router.post("/user/verify/code", function (req, res) {
     let username = req.body.username;
     let email = req.body.email;
+    let code = req.body.code;
+    user.checkUsernameAndEmailMatch(username, email, (b, r) => {
+        if (b) {
+            verifyVCodeForEmail(email, code, b => {
+                if (b) {
+                    let authcode = getNewAuthCode(username);
+                    res.json({
+                        code:0,
+                        message:'verify code successfully',
+                        data:{
+                            username:username,
+                            authcode:authcode
+                        }
+                    });
+                }
+                else{
+                    res.json({
+                        code:-1,
+                        message:'verification code incorrect'
+                    });
+                }
+            })
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'Email and username do not match'
+            });
+        }
+    });
 })
 
 router.get("/user/logout", function(req, res) {

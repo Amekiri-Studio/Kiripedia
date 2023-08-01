@@ -104,11 +104,64 @@ function checkUserLoginInvalid(username, password_hash, callback) {
     });
 }
 
+function checkUsernameAndEmailMatch(username, email, callback) {
+    mysql.sqlConnect();
+
+    let querySql = "SELECT * FROM user where username=? and password=?";
+    let params = [username, email];
+
+    mysql.connection.query(querySql, params, (err, result, fields) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+            callback(false);
+        }
+        else {
+            callback(true, result);
+        }
+    })
+}
+
+function alterUserInfo(uid, type, content, callback) {
+    mysql.sqlConnect();
+    let updateSql;
+
+    if (type === 'email') {
+        updateSql = "update user set email=? where uid=?";
+    }
+    else if (type === 'password') {
+        updateSql = "update user set password=? where uid=?";
+    }
+    else if (type === 'nickname') {
+        updateSql = "update user set nickname=? where uid=?";
+    }
+
+    let params;
+    if (type === 'password') {
+        params = [hash_pwd(content), uid];
+    }
+    else {
+        params = [content, uid];
+    }
+
+    mysql.connection.query(updateSql, params, (err, result, fields) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        callback(result);
+    });
+}
+
 module.exports = {
     createUser,
     queryExistsUsername,
     queryExistsEmail,
     checkInfoIsLegal,
     userLogin,
-    checkUserLoginInvalid
+    checkUserLoginInvalid,
+    checkUsernameAndEmailMatch,
+    alterUserInfo
 }

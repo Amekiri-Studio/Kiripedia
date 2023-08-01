@@ -6,15 +6,6 @@
     <title>Document</title>
 </head>
 <body>
-    <form method="post" action="/api/user/add">
-        <input name="username"/>
-        <input name="nickname"/>
-        <input name="password" type="password"/>
-        <input name="groups" type="number"/>
-        <input name="email" type="email"/>
-        <input name="code"/>
-        <input type="submit"/>
-    </form>
     <form method="post" action="/api/email/verify/code">
         <input name="email" type="email"/>
         <input type="submit"/>
@@ -23,6 +14,22 @@
         <input name="username" />
         <input type="password" name="password"/>
         <input type="submit"/>
+    </form>
+    <form method="post" accept="/api/user/verify/code">
+        <div>
+            <input name="username">
+        </div>
+        <div>
+            <input name="email" type="email">
+        </div>
+        <div>
+            <input name="code">
+        </div>
+    </form>
+    <form method="post" accept="/api/user/alter/email">
+        <div>
+            
+        </div>
     </form>
 </body>
 </html>
