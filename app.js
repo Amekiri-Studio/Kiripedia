@@ -12,6 +12,11 @@ var apiRouter = require('./routes/api');
 
 var app = express();
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerFile = require('./swagger_output.json');
+
+app.use('/api-doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');

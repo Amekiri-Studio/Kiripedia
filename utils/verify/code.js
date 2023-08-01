@@ -10,7 +10,7 @@ function getNewVCodeForEmail(email) {
 
 function verifyVCodeForEmail(email, code, callback) {
     redisConn.getKeyValue(email, val => {
-        let b = code.toUpperCase() === val.toUpperCase();
+        let b = code.toUpperCase() === val;
         if (b) {
             redisConn.delKeyValue(email);
         }

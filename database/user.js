@@ -107,7 +107,7 @@ function checkUserLoginInvalid(username, password_hash, callback) {
 function checkUsernameAndEmailMatch(username, email, callback) {
     mysql.sqlConnect();
 
-    let querySql = "SELECT * FROM user where username=? and password=?";
+    let querySql = "SELECT * FROM user where username=? and email=?";
     let params = [username, email];
 
     mysql.connection.query(querySql, params, (err, result, fields) => {
@@ -129,13 +129,13 @@ function alterUserInfo(uid, type, content, callback) {
     let updateSql;
 
     if (type === 'email') {
-        updateSql = "update user set email=? where uid=?";
+        updateSql = "update user set email=? where userid=?";
     }
     else if (type === 'password') {
-        updateSql = "update user set password=? where uid=?";
+        updateSql = "update user set password=? where userid=?";
     }
     else if (type === 'nickname') {
-        updateSql = "update user set nickname=? where uid=?";
+        updateSql = "update user set nickname=? where userid=?";
     }
 
     let params;

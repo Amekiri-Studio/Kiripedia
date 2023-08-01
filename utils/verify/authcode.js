@@ -10,15 +10,17 @@ function getNewAuthCode(username) {
 
 function verifyAuthCode(username, authcode, callback) {
     redisConn.getKeyValue(username, val => {
-        let b = val.toLowerCase() === authcode.toLowerCase();
-        if (b) {
-            redisConn.delKeyValue(username);
-        }
+        let b = val === authcode.toLowerCase();
         callback(b);
     });
 }
 
+function clearAuthCode(username) {
+    redisConn.delKeyValue(username);
+}
+
 module.exports = {
     getNewAuthCode,
-    verifyAuthCode
+    verifyAuthCode,
+    clearAuthCode
 }

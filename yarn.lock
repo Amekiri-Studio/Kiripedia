@@ -73,6 +73,11 @@ acorn@^4.0.4, acorn@~4.0.2:
   resolved "https://registry.npmjs.org/acorn/-/acorn-4.0.13.tgz"
   integrity sha512-fu2ygVGuMmlzG8ZeRJ0bvR41nsAkxxhbyk8bZ1SS521Z7vmgJFTQQlfz/Mp/nJexGBz+v8sC9bM6+lNgskt4Ug==
 
+acorn@^7.4.1:
+  version "7.4.1"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz"
+  integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+
 align-text@^0.1.1, align-text@^0.1.3:
   version "0.1.4"
   resolved "https://registry.npmjs.org/align-text/-/align-text-0.1.4.tgz"
@@ -317,6 +322,11 @@ decamelize@^1.0.0:
   resolved "https://registry.npmjs.org/decamelize/-/decamelize-1.2.0.tgz"
   integrity sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==
 
+deepmerge@^4.2.2:
+  version "4.3.1"
+  resolved "https://registry.npmjs.org/deepmerge/-/deepmerge-4.3.1.tgz"
+  integrity sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==
+
 denque@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/denque/-/denque-2.1.0.tgz"
@@ -407,7 +417,7 @@ express-swaggerize-ui@^1.0.3:
   dependencies:
     express "^4.13.3"
 
-express@^4.13.3, express@~4.16.1:
+express@^4.13.3, "express@>=4.0.0 || >=5.0.0-beta", express@~4.16.1:
   version "4.16.4"
   resolved "https://registry.npmjs.org/express/-/express-4.16.4.tgz"
   integrity sha512-j12Uuyb4FMrd/qQAm6uCHAkPtO8FDTRJZBDd5D2KOL2eLaz1yUNdUB/NOIyq0iU4q4cFarsUCrnFDPBcnksuOg==
@@ -503,7 +513,7 @@ get-intrinsic@^1.0.2:
     has-proto "^1.0.1"
     has-symbols "^1.0.3"
 
-glob@^7.0.3:
+glob@^7.0.3, glob@^7.1.7:
   version "7.2.3"
   resolved "https://registry.npmjs.org/glob/-/glob-7.2.3.tgz"
   integrity sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==
@@ -651,6 +661,11 @@ json-schema-ref-parser@^5.1.3:
     debug "^3.1.0"
     js-yaml "^3.12.0"
     ono "^4.0.6"
+
+json5@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.npmjs.org/json5/-/json5-2.2.3.tgz"
+  integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
 
 jsonschema-draft4@^1.0.0:
   version "1.0.0"
@@ -1218,6 +1233,16 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+swagger-autogen@^2.23.5:
+  version "2.23.5"
+  resolved "https://registry.npmjs.org/swagger-autogen/-/swagger-autogen-2.23.5.tgz"
+  integrity sha512-4Tl2+XhZMyHoBYkABnScHtQE0lKPKUD3NBt09mClrI6UKOUYljKlYw1xiFVwsHCTGR2hAXmhT4PpgjruCtt1ZA==
+  dependencies:
+    acorn "^7.4.1"
+    deepmerge "^4.2.2"
+    glob "^7.1.7"
+    json5 "^2.2.3"
+
 swagger-methods@^1.0.4:
   version "1.0.8"
   resolved "https://registry.npmjs.org/swagger-methods/-/swagger-methods-1.0.8.tgz"
@@ -1241,6 +1266,18 @@ swagger-schema-official@2.0.0-bab6bed:
   version "2.0.0-bab6bed"
   resolved "https://registry.npmjs.org/swagger-schema-official/-/swagger-schema-official-2.0.0-bab6bed.tgz"
   integrity sha512-rCC0NWGKr/IJhtRuPq/t37qvZHI/mH4I4sxflVM+qgVe5Z2uOCivzWaVbuioJaB61kvm5UvB7b49E+oBY0M8jA==
+
+swagger-ui-dist@>=5.0.0:
+  version "5.2.0"
+  resolved "https://registry.npmjs.org/swagger-ui-dist/-/swagger-ui-dist-5.2.0.tgz"
+  integrity sha512-rLvJBgualxNZcwKOmTFzy4zF1nHy+3S0pUDDR/ageDRZgi8aITSe7pVYiAy03xGQZtqEifjwEtHQE+eF14gveg==
+
+swagger-ui-express@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/swagger-ui-express/-/swagger-ui-express-5.0.0.tgz"
+  integrity sha512-tsU9tODVvhyfkNSvf03E6FAk+z+5cU3lXAzMy6Pv4av2Gt2xA0++fogwC4qo19XuFf6hdxevPuVCSKFuMHJhFA==
+  dependencies:
+    swagger-ui-dist ">=5.0.0"
 
 to-fast-properties@^1.0.3:
   version "1.0.3"

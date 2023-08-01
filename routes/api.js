@@ -9,7 +9,7 @@ const { getEmailTemp } = require('../utils/emailtemp');
 var email_config = require("../config/email");
 const { getToken, verifyToken } = require("../utils/verify/token");
 const { hash_pwd } = require("../utils/password_hash");
-const { verifyAuthCode, getNewAuthCode } = require("../utils/verify/authcode");
+const { verifyAuthCode, getNewAuthCode, clearAuthCode } = require("../utils/verify/authcode");
 
 // Root api path
 router.get('/',function (req,res) {
@@ -80,7 +80,7 @@ router.post('/user/login', function (req, res) {
         doLogin(username, password, req, res);
     }
     else {
-        let info = verifyToken(info);
+        let info = verifyToken(token, config.token_secret);
         user.checkUserLoginInvalid(info.username,info.password,(b, r) => {
             if (b) {
                 res.json({
@@ -131,6 +131,7 @@ router.get("/user/query/email", function (req, res) {
 
 router.post("/user/alter/email", function (req, res) {
     let token = req.cookies.token;
+    console.log(token);
     
     if (!token) {
         token = req.body.token;
@@ -139,18 +140,20 @@ router.post("/user/alter/email", function (req, res) {
                 code:-1,
                 message:"user not login or not token provided"
             });
+            return;
         }
     }
     let info = verifyToken(token, config.token_secret);
     user.checkUserLoginInvalid(info.username, info.password,(b, r) => {
         if (b) {
-            let authcode = req.body.author;
+            let authcode = req.body.authcode;
             let email = req.body.email;
             let code = req.body.code;
             verifyAuthCode(info.username, authcode, b => {
                 if (b) {
                     verifyVCodeForEmail(email, code, b => {
                         if (b) {
+                            clearAuthCode(info.username);
                             user.alterUserInfo(info.uid, 'email', email, result => {
                                 res.json({
                                     code:0,
