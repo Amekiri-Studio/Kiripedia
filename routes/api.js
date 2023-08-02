@@ -301,6 +301,12 @@ router.post("/user/alter/nickname", function (req, res) {
     });
 })
 
+router.post("/user/password/reset", function (req, res) {
+    let username = req.body.username;
+    let email = req.body.email;
+    res.json({message:'api invalid temporary'});
+})
+
 router.post("/user/verify/code", function (req, res) {
     let swagger_scan_only = req.body.token;
     let token = req.cookies.token;
@@ -353,7 +359,37 @@ router.post("/user/verify/code", function (req, res) {
 router.post("/user/verify/code/username", function(req, res) {
     let username = req.body.username;
     let code = req.body.code;
-    res.json({message:'api invalid temporary'});
+    user.queryExistsUsername(username, result => {
+        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+            res.json({
+                code:-1,
+                message:'user does not exists'
+            });
+        }
+        else {
+            let email = result[0].email;
+            let username = result[0].username;
+            verifyVCodeForEmail(email, code, b => {
+                if (b) {
+                    let authcode = getNewAuthCode(username);
+                    res.json({
+                        code:0,
+                        message:'verify code successfully',
+                        data:{
+                            username:username,
+                            authcode:authcode
+                        }
+                    });
+                }
+                else {
+                    res.json({
+                        code:-1,
+                        message:'verification code incorrect'
+                    });
+                }
+            });
+        }
+    });
 });
 
 router.post("/user/verify/code/email", function(req, res) {
