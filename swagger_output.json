@@ -137,6 +137,33 @@
         }
       }
     },
+    "/api/user/remove": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "example": "any"
+                },
+                "code": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/user/login_status": {
       "get": {
         "description": "",
@@ -251,7 +278,7 @@
         }
       }
     },
-    "/api/uset/alter/nickname": {
+    "/api/user/alter/nickname": {
       "post": {
         "description": "",
         "parameters": [
@@ -288,9 +315,60 @@
             "schema": {
               "type": "object",
               "properties": {
+                "token": {
+                  "example": "any"
+                },
+                "code": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/verify/code/username": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
                 "username": {
                   "example": "any"
                 },
+                "code": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/verify/code/email": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
                 "email": {
                   "example": "any"
                 },
@@ -299,6 +377,23 @@
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/info": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -329,6 +424,9 @@
               "type": "object",
               "properties": {
                 "email": {
+                  "example": "any"
+                },
+                "token": {
                   "example": "any"
                 }
               }

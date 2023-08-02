@@ -96,6 +96,43 @@ router.post('/user/login', function (req, res) {
     }
 })
 
+router.delete("/user/remove", function(req, res) {
+    let swagger_scan_only = req.body.token;
+    let token = req.cookies.token;
+    let code = req.body.code;
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
+    }
+
+    let info = verifyToken(token, config.token_secret);
+
+    user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
+        if (b) {
+            let userInfo = r[0];
+            let userEmail = userInfo.email;
+            verifyVCodeForEmail(email, code, b => {
+                if (b) {
+
+                }
+                else {
+                    res.json({
+                        code:-1,
+                        message:'Verification code error'
+                    });
+                }
+            })
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'token invalid'
+            });
+        }
+    });
+});
+
 router.get("/user/login_status", function(req, res) {
     let token = req.cookies.token;
     if (!token) {
@@ -130,17 +167,13 @@ router.get("/user/query/email", function (req, res) {
 })
 
 router.post("/user/alter/email", function (req, res) {
+    let swagger_scan_only = req.body.token;
     let token = req.cookies.token;
     
-    if (!token) {
-        token = req.body.token;
-        if (!token) {
-            res.json({
-                code:-1,
-                message:"user not login or not token provided"
-            });
-            return;
-        }
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
     }
     let info = verifyToken(token, config.token_secret);
     user.checkUserLoginInvalid(info.username, info.password,(b, r) => {
@@ -152,15 +185,25 @@ router.post("/user/alter/email", function (req, res) {
                 if (b) {
                     verifyVCodeForEmail(email, code, b => {
                         if (b) {
-                            clearAuthCode(info.username);
-                            user.alterUserInfo(info.uid, 'email', email, result => {
-                                res.json({
-                                    code:0,
-                                    message:'email alter successfully',
-                                    data:{
-                                        email:email
-                                    }
-                                })
+                            user.queryExistsEmail(email, r => {
+                                if (JSON.stringify(r) === "[]" || JSON.stringify(r) === "{}") {
+                                    clearAuthCode(info.username);
+                                    user.alterUserInfo(info.uid, 'email', email, result => {
+                                        res.json({
+                                            code:0,
+                                            message:'email alter successfully',
+                                            data:{
+                                                email:email
+                                            }
+                                        })
+                                    });
+                                }
+                                else {
+                                    res.json({
+                                        code:-1,
+                                        message:'email does exists'
+                                    });
+                                }
                             });
                         }
                         else {
@@ -189,16 +232,12 @@ router.post("/user/alter/email", function (req, res) {
 })
 
 router.post("/user/alter/password", function (req, res) {
+    let swagger_scan_only = req.body.token;
     let token = req.cookies.token;
-    if (!token) {
-        token = req.body.token;
-        if (!token) {
-            res.json({
-                code:-1,
-                message:"user not login or not token provided"
-            });
-            return;
-        }
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
     }
     let info = verifyToken(token, config.token_secret);
     let authcode = req.body.authcode;
@@ -233,17 +272,14 @@ router.post("/user/alter/password", function (req, res) {
     });
 })
 
-router.post("/uset/alter/nickname", function (req, res) {
+router.post("/user/alter/nickname", function (req, res) {
+    let swagger_scan_only = req.body.token;
     let token = req.cookies.token;
-    if (!token) {
-        token = req.body.token;
-        if (!token) {
-            res.json({
-                code:-1,
-                message:"user not login or not token provided"
-            });
-            return;
-        }
+
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
     }
     let info = verifyToken(token, config.token_secret);
     let nickname = req.body.nickname;
@@ -266,19 +302,33 @@ router.post("/uset/alter/nickname", function (req, res) {
 })
 
 router.post("/user/verify/code", function (req, res) {
-    let username = req.body.username;
-    let email = req.body.email;
+    let swagger_scan_only = req.body.token;
+    let token = req.cookies.token;
     let code = req.body.code;
-    user.checkUsernameAndEmailMatch(username, email, (b, r) => {
+
+    token = tokenCheck(token, req);
+    if (token === null) {
+        res.json({
+            code:-1,
+            message:"user not login or not token provided"
+        });
+        return;
+    }
+
+    let info = verifyToken(token, config.token_secret);
+
+    user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
         if (b) {
-            verifyVCodeForEmail(email, code, b => {
+            let userInfo = r[0];
+            let userEmail = userInfo.email;
+            verifyVCodeForEmail(userEmail, code, b => {
                 if (b) {
-                    let authcode = getNewAuthCode(username);
+                    let authcode = getNewAuthCode(userInfo.username);
                     res.json({
                         code:0,
                         message:'verify code successfully',
                         data:{
-                            username:username,
+                            username:userInfo.username,
                             authcode:authcode
                         }
                     });
@@ -294,10 +344,27 @@ router.post("/user/verify/code", function (req, res) {
         else {
             res.json({
                 code:-1,
-                message:'Email and username do not match'
-            });
+                message:'token invalid'
+            })
         }
     });
+})
+
+router.post("/user/verify/code/username", function(req, res) {
+    let username = req.body.username;
+    let code = req.body.code;
+    res.json({message:'api invalid temporary'});
+});
+
+router.post("/user/verify/code/email", function(req, res) {
+    let email = req.body.email;
+    let code = req.body.code;
+    res.json({message:'api invalid temporary'});
+});
+
+router.get("/user/info", function (req, res) {
+    let uid = req.query.uid;
+    res.json({message:'api invalid temporary'});
 })
 
 router.get("/user/logout", function(req, res) {
@@ -309,9 +376,22 @@ router.get("/user/logout", function(req, res) {
 })
 
 router.post('/email/verify/code', function (req, res) {
-    let isLogin = false;
-    var email;
-    if (!isLogin) {
+    let email = req.body.email;
+    let token = req.cookies.token;
+
+    if (!email) {
+        if (!token) {
+            token = req.body.token;
+            if (!token) {
+                res.json({
+                    code:-1,
+                    message:'no email provide and no token provide'
+                });
+                return
+            }
+        }
+    }
+    else {
         email = req.body.email;
         let code = getNewVCodeForEmail(email);
         sendMail(email,email_config.subject,getEmailTemp(code), (e, i) => {
@@ -319,6 +399,21 @@ router.post('/email/verify/code', function (req, res) {
         });
     }
 })
+
+function tokenCheck(token, req) {
+    if (!token) {
+        token = req.body.token;
+        if (!token) {
+            return null;
+        }
+        else {
+            return token;
+        }
+    }
+    else {
+        return token;
+    }
+}
 
 function doLogin(username, password, req, res) {
     user.userLogin(username, password, function(b, r) {
@@ -358,6 +453,13 @@ function doTokenCheckAndResponseToken(info, req, res) {
                 message:'token invaild'
             });
         }
+    });
+}
+
+function messageShowNoToken(res) {
+    res.json({
+        code:-1,
+        message:"user not login or not token provided"
     });
 }
 
