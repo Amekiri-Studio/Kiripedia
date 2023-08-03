@@ -304,7 +304,43 @@ router.post("/user/alter/nickname", function (req, res) {
 router.post("/user/password/reset", function (req, res) {
     let username = req.body.username;
     let email = req.body.email;
-    res.json({message:'api invalid temporary'});
+    let authcode = req.body.authcode;
+    let password = req.body.password;
+    if (!username) {
+        if (!username && !email) {
+            res.json({
+                code:-1,
+                message:'no username or email provide'
+            });
+            return;
+        }
+        user.queryExistsEmail(email, result => {
+            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+                res.json({
+                    code:-1,
+                    message:'email does not exists'
+                });
+                return;
+            }
+            else {
+                verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
+            }
+        });
+    }
+    else {
+        user.queryExistsUsername(username, result => {
+            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+                res.json({
+                    code:-1,
+                    message:'username does not exists'
+                });
+                return;
+            }
+            else {
+                verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
+            }
+        });
+    }
 })
 
 router.post("/user/verify/code", function (req, res) {
@@ -496,6 +532,28 @@ function messageShowNoToken(res) {
     res.json({
         code:-1,
         message:"user not login or not token provided"
+    });
+}
+
+function verifyAuthCodeAndAlterPassword(uid ,username, authcode, password, res) {
+    verifyAuthCode(username, authcode, b => {
+        if (b) {
+            user.alterUserInfo(uid, 'password', password, result => {
+                clearAuthCode(username);
+                res.json({
+                    code:0,
+                    message:'reset password successfully'
+                });
+            }, {
+                username:username
+            })
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'authorization code incorrect'
+            });
+        }
     });
 }
 
