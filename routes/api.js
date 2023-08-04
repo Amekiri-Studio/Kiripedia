@@ -112,9 +112,22 @@ router.delete("/user/remove", function(req, res) {
         if (b) {
             let userInfo = r[0];
             let userEmail = userInfo.email;
-            verifyVCodeForEmail(email, code, b => {
+            let userid = userInfo.userid;
+            if (!code) {
+                res.json({
+                    code:-1,
+                    message:'no verification code provide'
+                });
+                return;
+            }
+            verifyVCodeForEmail(userEmail, code, b => {
                 if (b) {
-
+                    user.removeUser(userid, result => {
+                        res.json({
+                            code:0,
+                            message:'user remove successfully'
+                        });
+                    });
                 }
                 else {
                     res.json({
@@ -431,7 +444,51 @@ router.post("/user/verify/code/username", function(req, res) {
 router.post("/user/verify/code/email", function(req, res) {
     let email = req.body.email;
     let code = req.body.code;
-    res.json({message:'api invalid temporary'});
+
+    if (!email) {
+        res.json({
+            code:-1,
+            message:'no email provide'
+        });
+        return;
+    }
+
+    user.queryExistsEmail(email, result => {
+        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+            res.json({
+                code:-1,
+                message:'email does not exists'
+            });
+        }
+        else {
+            if (!code) {
+                res.json({
+                    code:-1,
+                    message:'no verification code provide'
+                });
+                return;
+            }
+            verifyVCodeForEmail(email, code, b => {
+                if (b) {
+                    let authcode = getNewAuthCode(result[0].username);
+                    res.json({
+                        code:0,
+                        message:'verify code successfully',
+                        data:{
+                            email:email,
+                            authcode:authcode
+                        }
+                    });
+                }
+                else {
+                    res.json({
+                        code:-1,
+                        message:'verification code incorrect'
+                    });
+                }
+            });
+        }
+    });
 });
 
 router.get("/user/info", function (req, res) {

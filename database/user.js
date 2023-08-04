@@ -169,6 +169,20 @@ function queryUserId(userid, callback) {
     })
 }
 
+function removeUser(userid, callback) {
+    mysql.sqlConnect();
+    let updateSql = "UPDATE user SET nickname='USER REMOVED', email='USER REMOVED', avatar='USER REMOVED', password='USER REMOVED', user_status=-1 WHERE userid=?";
+    let params = [userid];
+
+    mysql.connection.query(updateSql, params, (err, result, fields) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        callback(result);
+    });
+}
+
 module.exports = {
     createUser,
     queryExistsUsername,
@@ -178,5 +192,6 @@ module.exports = {
     checkUserLoginInvalid,
     checkUsernameAndEmailMatch,
     alterUserInfo,
-    queryUserId
+    queryUserId,
+    removeUser
 }
