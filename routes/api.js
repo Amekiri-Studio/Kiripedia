@@ -13,7 +13,10 @@ const { verifyAuthCode, getNewAuthCode, clearAuthCode } = require("../utils/veri
 
 // Root api path
 router.get('/',function (req,res) {
-
+    res.status(403);
+    res.json({
+        message:'no right to access'
+    });
 })
 
 router.get("/logo",function (req,res) {
@@ -21,7 +24,9 @@ router.get("/logo",function (req,res) {
 })
 
 router.get("/language",function (req,res){
-
+    res.json({
+        message:'api invalid temporary'
+    });
 })
 
 // Function user operation
