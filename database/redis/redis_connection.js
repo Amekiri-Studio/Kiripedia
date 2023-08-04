@@ -6,9 +6,7 @@ var isConnect = false;
 
 function connectRedis() {
     redisClient = redis.createClient({
-        host: config.host,
-        port: config.port,
-        password: config.password
+        url: `redis://default:${config.password}@${config.host}:${config.port}`
     });
 
     redisClient.on("connect", () => {
