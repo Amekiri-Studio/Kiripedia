@@ -160,6 +160,7 @@ router.get("/user/login_status", function(req, res) {
                 code:-1,
                 message:'User not login or not token provide'
             });
+            return;
         }
         let info = verifyToken(token, config.token_secret);
         doTokenCheckAndResponseToken(info, req, res);
