@@ -12,6 +12,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const { processUserAvatarPath } = require("../../utils/imagepath/processpath");
+const { password } = require("../../config/mysql");
 
 const avatarStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -322,46 +323,54 @@ router.post("/email/alter", async function (req, res) {
     
 })
 
-// router.post("/password/alter", function (req, res) {
-//     let swagger_scan_only = req.body.token;
-//     let token = req.cookies.token;
-//     token = tokenCheck(token, req);
-//     if (token === null) {
-//         messageShowNoToken(res);
-//         return;
-//     }
-//     let info = verifyToken(token, config.token_secret);
-//     let authcode = req.body.authcode;
-//     let newPassword = req.body.password;
-//     user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-//         if (b) {
-//             verifyAuthCode(info.username, authcode, b => {
-//                 if (b) {
-//                     user.alterUserInfo(info.uid, 'password', newPassword, result => {
-//                         res.json({
-//                             code:0,
-//                             message:'alter password successfully'
-//                         });
-//                     }, {
-//                         username:info.username
-//                     });
-//                 }
-//                 else {
-//                     res.json({
-//                         code:-1,
-//                         message:'authorization code incorrect'
-//                     });
-//                 }
-//             });
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'token invalid'
-//             })
-//         }
-//     });
-// })
+router.post("/password/alter", async function (req, res) {
+    let swagger_scan_only = req.body.token;
+    let token = req.cookies.token;
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
+    }
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let authcode = req.body.authcode;
+        let newPassword = req.body.password;
+
+        let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+
+        if (!resultObject.inValid) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            })
+        }
+
+        let authcodeCorrection = await verifyAuthCode(username, authcode);
+
+        if (!authcodeCorrection) {
+            return res.json({
+                code:-1,
+                message:'authorization code incorrect'
+            });
+        }
+
+        let alterPwdResult = await user.alterUserInfo(info.uid, 'password', newPassword, {
+            username:info.username
+        });
+
+        res.json({
+            code:0,
+            message:'alter password successfully'
+        });
+
+    } catch (err) {
+        return res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
+})
 
 // router.post("/nickname/alter", function (req, res) {
 //     let swagger_scan_only = req.body.token;
