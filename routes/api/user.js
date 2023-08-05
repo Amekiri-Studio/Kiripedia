@@ -201,104 +201,126 @@ router.post("/remove", async function(req, res) {
     }
 });
 
-// router.get("/login_status", function(req, res) {
-//     let token = req.cookies.token;
-//     if (!token) {
-//         token = req.query.token;
-//         if (!token) {
-//             res.json({
-//                 code:-1,
-//                 message:'User not login or not token provide'
-//             });
-//             return;
-//         }
-//         let info = verifyToken(token, config.token_secret);
-//         doTokenCheckAndResponseToken(info, req, res);
-//     }
-//     else {
-//         info = verifyToken(token, config.token_secret);
-//         doTokenCheckAndResponseToken(info, req, res);
-//     }
-// })
+router.get("/login_status", function(req, res) {
+    let token = req.cookies.token;
+    if (!token) {
+        token = req.query.token;
+        if (!token) {
+            return res.json({
+                code:-1,
+                message:'User not login or not token provide'
+            });
+        }
+        doTokenCheckAndResponseToken(token, req, res);
+    }
+    else {
+        doTokenCheckAndResponseToken(token, req, res);
+    }
+})
 
-// router.get("/query/username", function (req, res) {
-//     let username = req.query.value;
-//     user.queryExistsUsername(username, r => {
-//         checkEmailOrUsernameExistsAndSendMessage(r, res);
-//     });
-// })
+router.get("/query/username", async function (req, res) {
+    let username = req.query.value;
+    try {
+        let isExists = await user.queryExistsUsername(username);
+        res.json({
+            code:0,
+            result:isExists
+        });
+    }
+    catch (err) {
+        return res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
+})
 
-// router.get("/query/email", function (req, res) {
-//     let email = req.query.value;
-//     user.queryExistsEmail(email,r => {
-//         checkEmailOrUsernameExistsAndSendMessage(r, res);
-//     });
-// })
+router.get("/query/email", async function (req, res) {
+    let email = req.query.value;
+    try {
+        let isExists = await user.queryExistsEmail(email);
+        res.json({
+            code:0,
+            result:isExists
+        });
+    }
+    catch (err) {
+        return res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
+})
 
-// router.post("/email/alter", function (req, res) {
-//     let swagger_scan_only = req.body.token;
-//     let token = req.cookies.token;
+router.post("/email/alter", async function (req, res) {
+    let swagger_scan_only = req.body.token;
+    let token = req.cookies.token;
     
-//     token = tokenCheck(token, req);
-//     if (token === null) {
-//         messageShowNoToken(res);
-//         return;
-//     }
-//     let info = verifyToken(token, config.token_secret);
-//     user.checkUserLoginInvalid(info.username, info.password,(b, r) => {
-//         if (b) {
-//             let authcode = req.body.authcode;
-//             let email = req.body.email;
-//             let code = req.body.code;
-//             verifyAuthCode(info.username, authcode, b => {
-//                 if (b) {
-//                     verifyVCodeForEmail(email, code, b => {
-//                         if (b) {
-//                             user.queryExistsEmail(email, r => {
-//                                 if (JSON.stringify(r) === "[]" || JSON.stringify(r) === "{}") {
-//                                     clearAuthCode(info.username);
-//                                     user.alterUserInfo(info.uid, 'email', email, result => {
-//                                         res.json({
-//                                             code:0,
-//                                             message:'email alter successfully',
-//                                             data:{
-//                                                 email:email
-//                                             }
-//                                         })
-//                                     });
-//                                 }
-//                                 else {
-//                                     res.json({
-//                                         code:-1,
-//                                         message:'email does exists'
-//                                     });
-//                                 }
-//                             });
-//                         }
-//                         else {
-//                             res.json({
-//                                 code:-1,
-//                                 message:'new email verification code incorrect'
-//                             })
-//                         }
-//                     })
-//                 }
-//                 else {
-//                     res.json({
-//                         code:-1,
-//                         message:'authorization code incorrect'
-//                     });
-//                 }
-//             });
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'token invalid'
-//             })
-//         }
-//     });
-// })
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
+    }
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+
+        if (!resultObject.isValid) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            });
+        }
+
+        let authcode = req.body.authcode;
+        let email = req.body.email;
+        let code = req.body.code;
+        let authcodeCorrection = await verifyAuthCode(info.username, authcode);
+        if (!authcodeCorrection) {
+            return res.json({
+                code:-1,
+                message:'authorization code incorrect'
+            });
+        }
+
+        let emailVCodeCorrection = await verifyVCodeForEmail(email, code);
+
+        if (!emailVCodeCorrection) {
+            return res.json({
+                code:-1,
+                message:'email does exists'
+            });
+        }
+
+        let emailExist = await user.queryExistsEmail(email);
+        if (emailExist) {
+            return res.json({
+                code:-1,
+                message:'email does exists'
+            });
+        }
+
+        let emailAlterResult = user.alterUserInfo(info.uid, 'email', email);
+
+        res.json({
+            code:0,
+            message:'email alter successfully',
+            data:{
+                email:email
+            }
+        })
+
+    } catch (err) {
+        return res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
+    
+})
 
 // router.post("/password/alter", function (req, res) {
 //     let swagger_scan_only = req.body.token;
@@ -715,19 +737,27 @@ async function doLogin(username, password, req, res) {
     }
 }
 
-// function doTokenCheckAndResponseToken(info, req, res) {
-//     user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-//         if (b) {
-//             res.json(info);
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'token invaild'
-//             });
-//         }
-//     });
-// }
+async function doTokenCheckAndResponseToken(token, req, res) {
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+        if (!resultObject.isValid) {
+            return res.json({
+                code:-1,
+                message:'token invaild'
+            });
+        }
+
+        res.json(info);
+    }
+    catch (err) {
+        return res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
+}
 
 function messageShowNoToken(res) {
     res.json({
