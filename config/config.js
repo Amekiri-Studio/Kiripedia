@@ -30,4 +30,7 @@ const robots_txt = `User-agent: *\n` +
                     `Disallow: /api\n` +
                     `Disallow: /api-doc`;
 
-module.exports = {website_name, website_logo, withCDN, mysql, mysql_type, token_secret, cookie_max_age, cookie_domain, robots_txt}
+const image_path = './public/images/useravatar';
+const image_uri = '/images/useravatar';
+
+module.exports = {website_name, website_logo, withCDN, mysql, mysql_type, token_secret, cookie_max_age, cookie_domain, robots_txt, image_path, image_uri}

@@ -6,30 +6,10 @@
     <title>Document</title>
 </head>
 <body>
-    <form method="post" action="/api/email/verify/code">
-        <input name="email" type="email"/>
-        <input type="submit"/>
-    </form>
-    <form method="post" action="/api/user/login">
-        <input name="username" />
-        <input type="password" name="password"/>
-        <input type="submit"/>
-    </form>
-    <form method="post" accept="/api/user/verify/code">
-        <div>
-            <input name="username">
-        </div>
-        <div>
-            <input name="email" type="email">
-        </div>
-        <div>
-            <input name="code">
-        </div>
-    </form>
-    <form method="post" accept="/api/user/alter/email">
-        <div>
-            
-        </div>
+    <form method="post" action="/api/user/avatar/alter" enctype="multipart/form-data">
+        <input type="text" name="token">
+        <input type="file" name="image">
+        <input type="submit">
     </form>
 </body>
 </html>

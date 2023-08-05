@@ -10,23 +10,43 @@ const { sendMail, hideEmail } = require("../../utils/email");
 var email_config = require("../../config/email");
 const multer = require('multer');
 const fs = require('fs');
+const path = require('path');
+const { processUserAvatarPath } = require("../../utils/imagepath/processpath");
 
 const avatarStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-      // 通过folder参数来决定文件的存储路径
-      const folder = req.query.folder || 'default'; // 默认存储在"default"文件夹中
-      const uploadPath = path.join('uploads', folder);
+        
+        let uploadPath;
 
-      // 检查目标文件夹是否存在，如果不存在则创建它
-      fs.mkdirSync(uploadPath, { recursive: true });
-  
-      cb(null, uploadPath);
+        let token = req.cookies.token;
+        if (!token) {
+            token = req.body.token;
+            if (!token) {
+                return cb(new Error('no token provide'));
+            }
+        }
+
+        let info = verifyToken(token, config.token_secret);
+        user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
+            if (b) {
+                uploadPath = path.join(config.image_path, r[0].userid.toString());
+                fs.mkdir(uploadPath, { recursive: true }, (err) => {
+                    if (err) {
+                        return cb(err);
+                    }
+                    cb(null, uploadPath);
+                })
+            }
+            else {
+                cb(new Error("token invalid"));
+            }
+        });
     },
     filename: function (req, file, cb) {
-      // 使用当前日期和时间来作为文件名
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const extension = path.extname(file.originalname);
-      cb(null, uniqueSuffix + extension);
+        // 使用当前日期和时间来作为文件名
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const extension = path.extname(file.originalname);
+        cb(null, uniqueSuffix + extension);
     }
   });
 
@@ -338,7 +358,34 @@ router.post('/avatar/alter', function (req, res) {
     }
 
     if (type == 'server') {
-        let imageData = req.body.imageData;
+        avatarUpload.single('image')(req, res, (err) => {
+            if (err) {
+                // 发生错误，返回错误响应
+                return res.json({
+                    code:-1,
+                    message:err.message
+                });
+            }
+
+            if (!req.file) {
+                return res.json({
+                    code:-1,
+                    message:'no image provide'
+                });
+            }
+            // 获取文件路径和文件名
+            const path = req.file.path;
+            const fileName = req.file.filename;
+            const uri = processUserAvatarPath(path);
+        
+            res.json({
+                code:0,
+                message:'upload successfully',
+                data:{
+                    imageuri:config.image_uri + uri
+                }
+            });
+        });
     }
     else if (type == 'client') {
 
