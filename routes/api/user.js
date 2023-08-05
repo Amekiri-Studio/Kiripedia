@@ -128,15 +128,23 @@ router.post('/login', async function (req, res) {
         doLogin(username, password, req, res);
     }
     else {
-        let info = verifyToken(token, config.token_secret);
-        let resultObject = await user.checkInfoIsLegal(info.username, info.password);
-        if (resultObject.isValid) {
+        try {
+            let info = verifyToken(token, config.token_secret);
+            let resultObject = await user.checkInfoIsLegal(info.username, info.password);
+            if (resultObject.isValid) {
+                return res.json({
+                    code:-1,
+                    message:'You are logged in'
+                });
+            }
+            doLogin(username,password,req,res);
+        } catch (err) {
             return res.json({
                 code:-1,
-                message:'You are logged in'
+                message:'error occupied',
+                data:err
             });
         }
-        doLogin(username,password,req,res);
     }
 })
 
@@ -150,46 +158,47 @@ router.post("/remove", async function(req, res) {
         return;
     }
 
-    let info = verifyToken(token, config.token_secret);
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
 
-    let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
-
-    user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-        if (b) {
-            let userInfo = r[0];
-            let userEmail = userInfo.email;
-            let userid = userInfo.userid;
-            if (!code) {
-                res.json({
-                    code:-1,
-                    message:'no verification code provide'
-                });
-                return;
-            }
-            verifyVCodeForEmail(userEmail, code, b => {
-                if (b) {
-                    user.removeUser(userid, result => {
-                        res.json({
-                            code:0,
-                            message:'user remove successfully'
-                        });
-                    });
-                }
-                else {
-                    res.json({
-                        code:-1,
-                        message:'Verification code error'
-                    });
-                }
-            })
-        }
-        else {
-            res.json({
+        if (!resultObject.isValid) {
+            return res.json({
                 code:-1,
                 message:'token invalid'
             });
         }
-    });
+
+        if (!code) {
+            return res.json({
+                code:-1,
+                message:'no verification code provide'
+            });
+        }
+        let email = resultObject.result[0].email;
+
+        let codeCorrection = await verifyVCodeForEmail(email, code);
+
+        if (!codeCorrection) {
+            return res.json({
+                code:-1,
+                message:'Verification code error'
+            });
+        }
+
+        let removeResult = await user.removeUser(resultObject.result[0].userid);
+        res.json({
+            code:0,
+            message:'user remove successfully'
+        });
+    }
+    catch (err) {
+        return res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
 });
 
 // router.get("/login_status", function(req, res) {
@@ -671,28 +680,37 @@ function tokenCheck(token, req) {
 }
 
 async function doLogin(username, password, req, res) {
-    let resultObject = await user.userLogin(username, password);
+    try {
+        let resultObject = await user.userLogin(username, password);
 
-    if (resultObject.status) {
-        token = getToken(resultObject.result[0].userid,resultObject.result[0].username,resultObject.result[0].password);
-        res.cookie("token", token, {
-            domain:config.cookie_domain,
-            maxAge:config.cookie_max_age
-        });
-        res.json({
-            code:0,
-            message:'Login successfully',
-            data:{
-                uid:resultObject.result[0].userid,
-                username:resultObject.result[0].username,
-                token:token
-             }
-        });
+        if (resultObject.status) {
+            token = getToken(resultObject.result[0].userid,resultObject.result[0].username,resultObject.result[0].password);
+            res.cookie("token", token, {
+                domain:config.cookie_domain,
+                maxAge:config.cookie_max_age
+            });
+            res.json({
+                code:0,
+                message:'Login successfully',
+                data:{
+                    uid:resultObject.result[0].userid,
+                    username:resultObject.result[0].username,
+                    token:token
+                 }
+            });
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'Username or password incorrect'
+            });
+        }
     }
-    else {
-        res.json({
+    catch (err) {
+        return res.json({
             code:-1,
-            message:'Username or password incorrect'
+            message:'error occupied',
+            data:err
         });
     }
 }
