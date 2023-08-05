@@ -24,6 +24,24 @@ function sendMail(to, subject, html, callback) {
     });
 }
 
+function cutEmail(email) {
+    return email.substring(email.indexOf('@'), email.length);
+}
+function hideEmail(email) {
+    var res = '';
+    var emailUsername = email.substring(0, email.indexOf('@'));
+    if (emailUsername.length < 6) {
+        res = email.substring(0, 1) + '****' + email.substring(email.indexOf('@'), email.length);
+    }
+    else {
+        res = email.substring(0, 2) + '****' + emailUsername.substring(emailUsername.length - 2, emailUsername.length) + email.substring(email.indexOf('@'), email.length);
+    }
+
+    return res;
+}
+
 module.exports = {
-    sendMail
+    sendMail,
+    cutEmail,
+    hideEmail
 }

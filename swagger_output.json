@@ -24,9 +24,12 @@
     "/robots.txt": {
       "get": {
         "description": "",
+        "produces": [
+          "text/plain"
+        ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -45,8 +48,11 @@
       "get": {
         "description": "",
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
@@ -65,8 +71,45 @@
       "get": {
         "description": "",
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/email/verify/code": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
@@ -138,7 +181,7 @@
       }
     },
     "/api/user/remove": {
-      "delete": {
+      "post": {
         "description": "",
         "parameters": [
           {
@@ -215,7 +258,7 @@
         }
       }
     },
-    "/api/user/alter/email": {
+    "/api/user/email/alter": {
       "post": {
         "description": "",
         "parameters": [
@@ -248,7 +291,7 @@
         }
       }
     },
-    "/api/user/alter/password": {
+    "/api/user/password/alter": {
       "post": {
         "description": "",
         "parameters": [
@@ -278,7 +321,7 @@
         }
       }
     },
-    "/api/user/alter/nickname": {
+    "/api/user/nickname/alter": {
       "post": {
         "description": "",
         "parameters": [
@@ -352,6 +395,30 @@
                   "example": "any"
                 },
                 "code": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/verify/code/get": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
                   "example": "any"
                 }
               }
@@ -439,33 +506,6 @@
     "/api/user/logout": {
       "get": {
         "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/email/verify/code": {
-      "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "example": "any"
-                },
-                "token": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
