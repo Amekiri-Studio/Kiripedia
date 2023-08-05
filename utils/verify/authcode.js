@@ -8,10 +8,14 @@ function getNewAuthCode(username) {
     return code;
 }
 
-function verifyAuthCode(username, authcode, callback) {
-    redisConn.getKeyValue(username, val => {
-        let b = val === authcode.toLowerCase();
-        callback(b);
+async function verifyAuthCode(username, authcode) {
+    return new Promise((resolve, reject) => {
+        redisConn.getKeyValue(username).then(value => {
+            let b = value === authcode.toLowerCase();
+            resolve(b);
+        }).catch(err => {
+            reject(err);
+        });
     });
 }
 

@@ -29,9 +29,13 @@ function setExpire(key, time) {
     redisClient.expire(key, time);
 }
 
-function getKeyValue(key, callback) {
-    redisClient.get(key).then(val => {
-        callback(val);
+function getKeyValue(key) {
+    return new Promise((resolve, reject) => {
+        redisClient.get(key).then(val => {
+            resolve(val);
+        }).catch(err => {
+            reject(err)
+        });
     });
 }
 

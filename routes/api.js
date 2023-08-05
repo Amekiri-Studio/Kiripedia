@@ -24,14 +24,22 @@ router.get("/language",function (req,res){
     });
 })
 
-router.post('/email/verify/code', function (req, res) {
+router.post('/email/verify/code', async function (req, res) {
     let email = req.body.email;
     
     email = req.body.email;
     let code = getNewVCodeForEmail(email);
-    sendMail(email,email_config.subject,getEmailTemp(code), (e, i) => {
-        res.json(i);
-    });
+    try {
+        let result = await sendMail(email,email_config.subject,getEmailTemp(code));
+        res.json(result);
+    }
+    catch (err) {
+        res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
 })
 
 module.exports = router;

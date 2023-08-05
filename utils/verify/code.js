@@ -8,13 +8,14 @@ function getNewVCodeForEmail(email) {
     return code;
 }
 
-function verifyVCodeForEmail(email, code, callback) {
-    redisConn.getKeyValue(email, val => {
-        let b = code.toUpperCase() === val;
-        if (b) {
-            redisConn.delKeyValue(email);
-        }
-        callback(b);
+async function verifyVCodeForEmail(email, code) {
+    return new Promise((resolve, reject) => {
+        redisConn.getKeyValue(email).then(value => {
+            let b = value === code.toUpperCase();
+            resolve(b);
+        }).catch(err => {
+            reject(err);
+        });
     });
 }
 
