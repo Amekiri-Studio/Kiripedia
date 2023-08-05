@@ -1,48 +1,55 @@
 var mysql = require('./mysql_connection');
 var { hash_pwd } = require("../utils/password_hash");
 
-function createUser(username,nickname,password,email,group,callback) {
-    mysql.sqlConnect();
+async function createUser(username,nickname,password,email,group,callback) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
 
-    let addSql = 'INSERT INTO user(username,nickname,password,email,user_belong_groups,user_status) VALUES(?,?,?,?,?,?)';
-    let params = [username,nickname,hash_pwd(username,password),email,group,0];
+        let addSql = 'INSERT INTO user(username,nickname,password,email,user_belong_groups,user_status) VALUES(?,?,?,?,?,?)';
+        let params = [username,nickname,hash_pwd(username,password),email,group,0];
+    
+        mysql.connection.query(addSql,params,(err ,results, fields) => {
+            if (err) {
+                console.log(err.message);
+                return reject(err);
+            }
+            resolve(results);
+        });
+    });
+    
+}
 
-    mysql.connection.query(addSql,params,(err ,results, fields) => {
-        if (err) {
-            console.log(err.message);
-            return;
-        }
-        callback(results);
+async function queryExistsUsername(username, callback) {
+    return new Promise((resolve,reject) => {
+        mysql.sqlConnect();
+
+        let querySql = "SELECT * FROM user where username=?";
+        let params = [username];
+    
+        mysql.connection.query(querySql,params,(err, results, fields) => {
+            if (err) {
+                console.log(err.message);
+                return reject(err);
+            }
+            resolve(results);
+        });
     });
 }
 
-function queryExistsUsername(username, callback) {
-    mysql.sqlConnect();
+async function queryExistsEmail(email, callback) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
 
-    let querySql = "SELECT * FROM user where username=?";
-    let params = [username];
-
-    mysql.connection.query(querySql,params,(err, results, fields) => {
-        if (err) {
-            console.log(err.message);
-            return;
-        }
-        callback(results);
-    });
-}
-
-function queryExistsEmail(email, callback) {
-    mysql.sqlConnect();
-
-    let querySql = "SELECT * FROM user where email=?";
-    let params = [email];
-
-    mysql.connection.query(querySql,params,(err, results, fields) => {
-        if (err) {
-            console.log(err.message);
-            return;
-        }
-        callback(results);
+        let querySql = "SELECT * FROM user where email=?";
+        let params = [email];
+    
+        mysql.connection.query(querySql,params,(err, results, fields) => {
+            if (err) {
+                console.log(err.message);
+                return reject(err);
+            }
+            resolve(results);
+        });
     });
 }
 
@@ -64,109 +71,119 @@ function checkInfoIsLegal(username, email, uecallback, eecallback, callback) {
     });
 }
 
-function userLogin(username, password, callback) {
-    mysql.sqlConnect();
+async function userLogin(username, password, callback) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
     
-    let querySql = "SELECT * FROM user where username=? and password=?"
-    let params = [username, hash_pwd(username,password)];
+        let querySql = "SELECT * FROM user where username=? and password=?"
+        let params = [username, hash_pwd(username,password)];
     
-    mysql.connection.query(querySql, params, (err, result, fields) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-            callback(false);
-        }
-        else {
-            callback(true, result);
-        }
+        mysql.connection.query(querySql, params, (err, result, fields) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+                resolve({status:false});
+            }
+            else {
+                callback({status:true, result});
+            }
+        });
     });
 }
 
-function checkUserLoginInvalid(username, password_hash, callback) {
-    mysql.sqlConnect();
+async function checkUserLoginInvalid(username, password_hash) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
 
-    let querySql = "SELECT * FROM user where username=? and password=?"
-    let params = [username, password_hash];
+        let querySql = "SELECT * FROM user where username=? and password=?"
+        let params = [username, password_hash];
 
-    mysql.connection.query(querySql, params, (err, result, fields) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-            callback(false);
-        }
-        else {
-            callback(true, result);
-        }
+        mysql.connection.query(querySql, params, (err, result, fields) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+                resolve({ isValid:false });
+            }
+            else {
+                resolve({ isValid:true, result });
+            }
+        });
     });
 }
 
-function checkUsernameAndEmailMatch(username, email, callback) {
-    mysql.sqlConnect();
+async function checkUsernameAndEmailMatch(username, email) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
 
-    let querySql = "SELECT * FROM user where username=? and email=?";
-    let params = [username, email];
+            let querySql = "SELECT * FROM user where username=? and email=?";
+            let params = [username, email];
 
-    mysql.connection.query(querySql, params, (err, result, fields) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-            callback(false);
-        }
-        else {
-            callback(true, result);
-        }
-    })
-}
-
-function alterUserInfo(uid, type, content, callback, option) {
-    mysql.sqlConnect();
-    let updateSql;
-
-    if (type === 'email') {
-        updateSql = "update user set email=? where userid=?";
-    }
-    else if (type === 'password') {
-        updateSql = "update user set password=? where userid=?";
-    }
-    else if (type === 'nickname') {
-        updateSql = "update user set nickname=? where userid=?";
-    }
-
-    let params;
-    if (type === 'password') {
-        params = [hash_pwd(option.username,content), uid];
-    }
-    else {
-        params = [content, uid];
-    }
-
-    mysql.connection.query(updateSql, params, (err, result, fields) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        callback(result);
+            mysql.connection.query(querySql, params, (err, result, fields) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
+                resolve({match: false});
+            }
+            else {
+                resolve({match: true, result});
+            }
+        })
     });
 }
 
-function queryUserId(userid, callback) {
-    mysql.sqlConnect();
-    let querySql = "SELECT * FROM user where userid=?";
-    let params = [userid];
+async function alterUserInfo(uid, type, content, option) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
+        let updateSql;
 
-    mysql.connection.query(querySql, params, (err, result, fields) => {
-        if (err) {
-            console.log(err);
-            return;
+        if (type === 'email') {
+            updateSql = "update user set email=? where userid=?";
         }
-        callback(result);
-    })
+        else if (type === 'password') {
+            updateSql = "update user set password=? where userid=?";
+        }
+        else if (type === 'nickname') {
+            updateSql = "update user set nickname=? where userid=?";
+        }
+
+        let params;
+        if (type === 'password') {
+            params = [hash_pwd(option.username,content), uid];
+        }
+        else {
+            params = [content, uid];
+        }
+
+        mysql.connection.query(updateSql, params, (err, result, fields) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            resolve(result);
+        });
+    });
+}
+
+async function queryUserId(userid, callback) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
+        let querySql = "SELECT * FROM user where userid=?";
+        let params = [userid];
+
+        mysql.connection.query(querySql, params, (err, result, fields) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            resolve(result);
+        })
+    });
 }
 
 function removeUser(userid, callback) {
