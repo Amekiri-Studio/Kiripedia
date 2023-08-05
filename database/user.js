@@ -1,7 +1,7 @@
 var mysql = require('./mysql_connection');
 var { hash_pwd } = require("../utils/password_hash");
 
-async function createUser(username,nickname,password,email,group,callback) {
+async function createUser(username,nickname,password,email,group) {
     return new Promise((resolve, reject) => {
         mysql.sqlConnect();
 
@@ -16,10 +16,9 @@ async function createUser(username,nickname,password,email,group,callback) {
             resolve(results);
         });
     });
-    
 }
 
-async function queryExistsUsername(username, callback) {
+async function queryExistsUsername(username) {
     return new Promise((resolve,reject) => {
         mysql.sqlConnect();
 
@@ -31,12 +30,17 @@ async function queryExistsUsername(username, callback) {
                 console.log(err.message);
                 return reject(err);
             }
-            resolve(results);
+            if (JSON.stringify(results) === "[]" || JSON.stringify(results) === "{}") {
+                resolve(false);
+            }
+            else {
+                resolve(true);
+            }
         });
     });
 }
 
-async function queryExistsEmail(email, callback) {
+async function queryExistsEmail(email) {
     return new Promise((resolve, reject) => {
         mysql.sqlConnect();
 
@@ -48,7 +52,12 @@ async function queryExistsEmail(email, callback) {
                 console.log(err.message);
                 return reject(err);
             }
-            resolve(results);
+            if (JSON.stringify(results) === "[]" || JSON.stringify(results) === "{}") {
+                resolve(false);
+            }
+            else {
+                resolve(true);
+            }
         });
     });
 }
@@ -81,13 +90,13 @@ async function userLogin(username, password, callback) {
         mysql.connection.query(querySql, params, (err, result, fields) => {
             if (err) {
                 console.log(err);
-                return;
+                return reject(err);
             }
             if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
                 resolve({status:false});
             }
             else {
-                callback({status:true, result});
+                resolve({status:true, result});
             }
         });
     });
