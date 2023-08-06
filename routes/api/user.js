@@ -415,6 +415,7 @@ router.post('/avatar/alter', async function (req, res) {
             const fileUploadPromise = new Promise((resolve, reject) => {
                 avatarUpload.single('image')(req, res, (err) => {
                     if (err) {
+                        console.log(err.message);
                         reject(err); // 发生错误，拒绝 Promise 并传递错误
                     } else {
                         resolve(); // 完成上传，解决 Promise
@@ -482,6 +483,12 @@ router.post('/avatar/alter', async function (req, res) {
             });
         }
     } catch (err) {
+        if (err.message.toLowerCase() === "no token provide") {
+            return res.send({
+                code:-1,
+                message:err.message
+            })
+        }
         return errorReturn(err, res);
     }
 })
