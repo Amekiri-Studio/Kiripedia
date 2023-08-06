@@ -449,8 +449,33 @@ router.post('/avatar/alter', async function (req, res) {
             });
         }
         else if (type == 'client') {
+            let token = req.cookies.token;
+            if (!token) {
+                token = req.body.token;
+                if (!token) {
+                    return messageShowNoToken(res);
+                }
+            }
             let image_path = req.body.image_path;
-            
+            let info = verifyToken(token, config.token_secret);
+
+            let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+
+            if (!resultObject.isValid) {
+                return res.json({
+                    code:-1,
+                    message:'token invalid'
+                });
+            }
+
+            await user.alterUserInfo(resultObject.result[0].userid, 'avatar', image_path);
+            res.json({
+                code: 0,
+                message: 'alter successfully',
+                data: {
+                    imageuri: config.image_uri + uri
+                }
+            })
         }
         else {
             res.json({
@@ -576,131 +601,145 @@ router.post("/verify/code/get",async function (req, res) {
     }
 })
 
-// router.post("/verify/code/username", function(req, res) {
-//     let username = req.body.username;
-//     let code = req.body.code;
-//     user.queryExistsUsername(username, result => {
-//         if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-//             res.json({
-//                 code:-1,
-//                 message:'user does not exists'
-//             });
-//         }
-//         else {
-//             let email = result[0].email;
-//             let username = result[0].username;
-//             verifyVCodeForEmail(email, code, b => {
-//                 if (b) {
-//                     let authcode = getNewAuthCode(username);
-//                     res.json({
-//                         code:0,
-//                         message:'verify code successfully',
-//                         data:{
-//                             username:username,
-//                             authcode:authcode
-//                         }
-//                     });
-//                 }
-//                 else {
-//                     res.json({
-//                         code:-1,
-//                         message:'verification code incorrect'
-//                     });
-//                 }
-//             });
-//         }
-//     });
-// });
+router.post("/verify/code/username", async function(req, res) {
+    let username = req.body.username;
+    let code = req.body.code;
 
-// router.post("/verify/code/email", function(req, res) {
-//     let email = req.body.email;
-//     let code = req.body.code;
+    try {
+        let usernameExist = await user.queryExistsUsername(username);
 
-//     if (!email) {
-//         res.json({
-//             code:-1,
-//             message:'no email provide'
-//         });
-//         return;
-//     }
+        if (!usernameExist) {
+            return res.json({
+                code:-1,
+                message:'username does not exists'
+            });
+        }
 
-//     user.queryExistsEmail(email, result => {
-//         if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-//             res.json({
-//                 code:-1,
-//                 message:'email does not exists'
-//             });
-//         }
-//         else {
-//             if (!code) {
-//                 res.json({
-//                     code:-1,
-//                     message:'no verification code provide'
-//                 });
-//                 return;
-//             }
-//             verifyVCodeForEmail(email, code, b => {
-//                 if (b) {
-//                     let authcode = getNewAuthCode(result[0].username);
-//                     res.json({
-//                         code:0,
-//                         message:'verify code successfully',
-//                         data:{
-//                             email:email,
-//                             authcode:authcode
-//                         }
-//                     });
-//                 }
-//                 else {
-//                     res.json({
-//                         code:-1,
-//                         message:'verification code incorrect'
-//                     });
-//                 }
-//             });
-//         }
-//     });
-// });
+        let result = await user.getUserInfoByUsername(username);
+        let email = result[0].email;
+        username = result[0].username;
 
-// router.get("/info", function (req, res) {
-//     let uid = req.query.uid;
-//     user.queryUserId(uid, result => {
-//         if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-//             res.json({
-//                 code:-1,
-//                 message:'user does not exists'
-//             });
-//             return;
-//         }
-//         let userInfo = result[0];
-//         if (userInfo.user_status === -1) {
-//             res.json({
-//                 code:-1,
-//                 message:'user removed'
-//             });
-//             return;
-//         }
-//         res.json({
-//             code:0,
-//             message:'Get user info successfully',
-//             data:{
-//                 uid:userInfo.userid,
-//                 username:userInfo.username,
-//                 nickname:userInfo.nickname,
-//                 avatar:userInfo.avatar,
-//                 email:hideEmail(userInfo.email)
-//             }
-//         });
-//     });
-// })
+        let codeCorrection = await verifyVCodeForEmail(email, code);
 
-// router.get("/logout", function(req, res) {
-//     res.clearCookie('token');
-//     res.json({
-//         code:0,
-//         message:'Log out successfully, please remove token on local storage'
-//     });
-// })
+        if (!codeCorrection) {
+            return res.json({
+                code:-1,
+                message:'verification code incorrect'
+            });
+        }
+
+        let authcode = getNewAuthCode(username);
+        res.json({
+            code:0,
+            message:'verify code successfully',
+            data:{
+                username:username,
+                authcode:authcode
+            }
+        });
+    } catch (error) {
+        return errorReturn(error, res);
+    }
+});
+
+router.post("/verify/code/email", async function(req, res) {
+    let email = req.body.email;
+    let code = req.body.code;
+
+    if (!email) {
+        return res.json({
+            code:-1,
+            message:'no email provide'
+        });
+    }
+
+    try {
+        let emailExist = await user.queryExistsEmail(email);
+
+        if (!emailExist) {
+            return res.json({
+                code:-1,
+                message:'email does not exists'
+            });
+        }
+
+        if (!code) {
+            return res.json({
+                code:-1,
+                message:'no verification code provide'
+            });
+        }
+
+        let codeCorrection = await verifyVCodeForEmail(email, code);
+
+        if (!codeCorrection) {
+            return res.json({
+                code:-1,
+                message:'verification code incorrect'
+            });
+        }
+
+        let result = await user.getUserInfoByEmail(email);
+        let username = result[0].username;
+
+        let authcode = getNewAuthCode(username);
+        res.json({
+            code:0,
+            message:'verify code successfully',
+            data:{
+                email:email,
+                authcode:authcode
+            }
+        });
+    } catch (error) {
+        return errorReturn(error, res);
+    }
+});
+
+router.get("/info", async function (req, res) {
+    let uid = req.query.uid;
+
+    try {
+        let userObject = await user.queryUserId(uid);
+
+        if (JSON.stringify(userObject) === "[]" || JSON.stringify(userObject) === "{}") {
+            return res.json({
+                code:-1,
+                message:'user does not exists'
+            });
+        }
+
+        let userInfo = userObject[0];
+        if (userInfo.user_status === -1) {
+            res.json({
+                code:-1,
+                message:'user removed'
+            });
+            return;
+        }
+        res.json({
+            code:0,
+            message:'Get user info successfully',
+            data:{
+                uid:userInfo.userid,
+                username:userInfo.username,
+                nickname:userInfo.nickname,
+                avatar:userInfo.avatar,
+                email:hideEmail(userInfo.email)
+            }
+        });
+    } catch(error) {
+        return errorReturn(error, res);
+    }
+})
+
+router.get("/logout", function(req, res) {
+    res.clearCookie('token');
+    res.json({
+        code:0,
+        message:'Log out successfully, please remove token on local storage'
+    });
+})
 
 function tokenCheck(token, req) {
     if (!token) {

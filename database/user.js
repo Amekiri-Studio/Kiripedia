@@ -40,6 +40,23 @@ async function queryExistsUsername(username) {
     });
 }
 
+async function getUserInfoByUsername(username) {
+    return new Promise((resolve,reject) => {
+        mysql.sqlConnect();
+
+        let querySql = "SELECT * FROM user where username=?";
+        let params = [username];
+    
+        mysql.connection.query(querySql,params,(err, results, fields) => {
+            if (err) {
+                console.log(err.message);
+                return reject(err);
+            }
+            resolve(results);
+        });
+    });
+}
+
 async function queryExistsEmail(email) {
     return new Promise((resolve, reject) => {
         mysql.sqlConnect();
@@ -58,6 +75,23 @@ async function queryExistsEmail(email) {
             else {
                 resolve(true);
             }
+        });
+    });
+}
+
+async function getUserInfoByEmail(email) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
+
+        let querySql = "SELECT * FROM user where email=?";
+        let params = [email];
+    
+        mysql.connection.query(querySql,params,(err, results, fields) => {
+            if (err) {
+                console.log(err.message);
+                return reject(err);
+            }
+            resolve(results);
         });
     });
 }
@@ -182,7 +216,7 @@ async function alterUserInfo(uid, type, content, option) {
     });
 }
 
-async function queryUserId(userid, callback) {
+async function queryUserId(userid) {
     return new Promise((resolve, reject) => {
         mysql.sqlConnect();
         let querySql = "SELECT * FROM user where userid=?";
@@ -218,6 +252,8 @@ module.exports = {
     createUser,
     queryExistsUsername,
     queryExistsEmail,
+    getUserInfoByUsername,
+    getUserInfoByEmail,
     checkInfoIsLegal,
     userLogin,
     checkUserLoginInvalid,
