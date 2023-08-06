@@ -29,7 +29,7 @@ function setExpire(key, time) {
     redisClient.expire(key, time);
 }
 
-function getKeyValue(key) {
+async function getKeyValue(key) {
     return new Promise((resolve, reject) => {
         redisClient.get(key).then(val => {
             resolve(val);
