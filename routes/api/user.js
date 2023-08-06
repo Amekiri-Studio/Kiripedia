@@ -12,8 +12,6 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const { processUserAvatarPath, getUidOnPath } = require("../../utils/imagepath/processpath");
-const { password } = require("../../config/mysql");
-const { error } = require("console");
 
 const avatarStorage = multer.diskStorage({
     destination: async function (req, file, cb) {
