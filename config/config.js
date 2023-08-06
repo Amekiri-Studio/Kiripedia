@@ -20,7 +20,7 @@ const withCDN = false;
 
 const mysql = require('mysql');
 
-const cookie_max_age = 360000;
+const cookie_max_age = 36000000;
 
 const cookie_domain = "";
 

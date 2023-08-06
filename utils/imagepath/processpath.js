@@ -4,6 +4,13 @@ function processUserAvatarPath(fullpath) {
     return result;
 }
 
+// need processed path
+function getUidOnPath(process_path) {
+    let path_groups = process_path.split("/");
+    let result = parseInt(path_groups[1]);
+    return result;
+}
+
 module.exports = {
-    processUserAvatarPath
+    processUserAvatarPath,getUidOnPath
 }

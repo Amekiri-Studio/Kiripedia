@@ -160,6 +160,9 @@ async function alterUserInfo(uid, type, content, option) {
         else if (type === 'nickname') {
             updateSql = "update user set nickname=? where userid=?";
         }
+        else if (type === 'avatar') {
+            updateSql = "update user set avatar=? where userid=?";
+        }
 
         let params;
         if (type === 'password') {

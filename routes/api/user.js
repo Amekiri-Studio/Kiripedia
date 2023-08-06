@@ -11,11 +11,12 @@ var email_config = require("../../config/email");
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const { processUserAvatarPath } = require("../../utils/imagepath/processpath");
+const { processUserAvatarPath, getUidOnPath } = require("../../utils/imagepath/processpath");
 const { password } = require("../../config/mysql");
+const { error } = require("console");
 
 const avatarStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: async function (req, file, cb) {
         
         let uploadPath;
 
@@ -26,22 +27,19 @@ const avatarStorage = multer.diskStorage({
                 return cb(new Error('no token provide'));
             }
         }
-
-        let info = verifyToken(token, config.token_secret);
-        user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-            if (b) {
-                uploadPath = path.join(config.image_path, r[0].userid.toString());
-                fs.mkdir(uploadPath, { recursive: true }, (err) => {
-                    if (err) {
-                        return cb(err);
-                    }
-                    cb(null, uploadPath);
-                })
+        try {
+            let info = verifyToken(token, config.token_secret);
+            let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+            if (!resultObject.isValid) {
+                return cb(new Error("token invalid"));
             }
-            else {
-                cb(new Error("token invalid"));
-            }
-        });
+            uploadPath = path.join(config.image_path, info.uid.toString());
+            console.log(uploadPath);
+            await fs.promises.mkdir(uploadPath, { recursive: true });
+            cb(null, uploadPath);
+        } catch (error) {
+            return cb(error);
+        }
     },
     filename: function (req, file, cb) {
         // 使用当前日期和时间来作为文件名
@@ -261,8 +259,7 @@ router.post("/email/alter", async function (req, res) {
     
     token = tokenCheck(token, req);
     if (token === null) {
-        messageShowNoToken(res);
-        return;
+        return messageShowNoToken(res);
     }
     try {
         let info = verifyToken(token, config.token_secret);
@@ -328,8 +325,7 @@ router.post("/password/alter", async function (req, res) {
     let token = req.cookies.token;
     token = tokenCheck(token, req);
     if (token === null) {
-        messageShowNoToken(res);
-        return;
+        return messageShowNoToken(res);
     }
     try {
         let info = verifyToken(token, config.token_secret);
@@ -338,14 +334,14 @@ router.post("/password/alter", async function (req, res) {
 
         let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
 
-        if (!resultObject.inValid) {
+        if (!resultObject.isValid) {
             return res.json({
                 code:-1,
                 message:'token invalid'
             })
         }
 
-        let authcodeCorrection = await verifyAuthCode(username, authcode);
+        let authcodeCorrection = await verifyAuthCode(info.username, authcode);
 
         if (!authcodeCorrection) {
             return res.json({
@@ -354,6 +350,7 @@ router.post("/password/alter", async function (req, res) {
             });
         }
 
+        clearAuthCode(info.username);
         let alterPwdResult = await user.alterUserInfo(info.uid, 'password', newPassword, {
             username:info.username
         });
@@ -364,7 +361,7 @@ router.post("/password/alter", async function (req, res) {
         });
 
     } catch (err) {
-        return res.json({
+        return res.status(500).json({
             code:-1,
             message:'error occupied',
             data:err
@@ -372,202 +369,212 @@ router.post("/password/alter", async function (req, res) {
     }
 })
 
-// router.post("/nickname/alter", function (req, res) {
-//     let swagger_scan_only = req.body.token;
-//     let token = req.cookies.token;
+router.post("/nickname/alter", async function (req, res) {
+    let swagger_scan_only = req.body.token;
+    let token = req.cookies.token;
 
-//     token = tokenCheck(token, req);
-//     if (token === null) {
-//         messageShowNoToken(res);
-//         return;
-//     }
-//     let info = verifyToken(token, config.token_secret);
-//     let nickname = req.body.nickname;
-//     user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-//         if (b) {
-//             user.alterUserInfo(info.uid, 'nickname', nickname, result => {
-//                 res.json({
-//                     code:0,
-//                     message:'alter nickname successfully'
-//                 });
-//             });
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'token invalid'
-//             })
-//         }
-//     });
-// })
+    token = tokenCheck(token, req);
+    if (token === null) {
+        messageShowNoToken(res);
+        return;
+    }
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let nickname = req.body.nickname;
 
-// router.post('/avatar/alter', function (req, res) {
-//     let type = req.body.type;
-//     if (!type) {
-//         type = 'server';
-//     }
+        resultObject = await user.checkUserLoginInvalid(info.username, info.password);
 
-//     if (type == 'server') {
-//         avatarUpload.single('image')(req, res, (err) => {
-//             if (err) {
-//                 // 发生错误，返回错误响应
-//                 return res.json({
-//                     code:-1,
-//                     message:err.message
-//                 });
-//             }
+        if (!resultObject.isValid) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            })
+        }
 
-//             if (!req.file) {
-//                 return res.json({
-//                     code:-1,
-//                     message:'no image provide'
-//                 });
-//             }
-//             // 获取文件路径和文件名
-//             const path = req.file.path;
-//             const fileName = req.file.filename;
-//             const uri = processUserAvatarPath(path);
-        
-//             res.json({
-//                 code:0,
-//                 message:'upload successfully',
-//                 data:{
-//                     imageuri:config.image_uri + uri
-//                 }
-//             });
-//         });
-//     }
-//     else if (type == 'client') {
+        let alterResult = await user.alterUserInfo(info.uid, 'nickname', nickname);
 
-//     }
-//     else {
-//         res.json({
-//             code:-1,
-//             message:'type error'
-//         });
-//     }
-// })
+        res.json({
+            code:0,
+            message:'alter nickname successfully',
+            data:{
+                nickname:nickname
+            }
+        });
+    }
+    catch (err) {
+        return errorReturn(err, res);
+    }
+})
 
-// router.post("/password/reset", function (req, res) {
-//     let username = req.body.username;
-//     let email = req.body.email;
-//     let authcode = req.body.authcode;
-//     let password = req.body.password;
-//     if (!username) {
-//         if (!username && !email) {
-//             res.json({
-//                 code:-1,
-//                 message:'no username or email provide'
-//             });
-//             return;
-//         }
-//         user.queryExistsEmail(email, result => {
-//             if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-//                 res.json({
-//                     code:-1,
-//                     message:'email does not exists'
-//                 });
-//                 return;
-//             }
-//             else {
-//                 verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
-//             }
-//         });
-//     }
-//     else {
-//         user.queryExistsUsername(username, result => {
-//             if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-//                 res.json({
-//                     code:-1,
-//                     message:'username does not exists'
-//                 });
-//                 return;
-//             }
-//             else {
-//                 verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
-//             }
-//         });
-//     }
-// })
+router.post('/avatar/alter', async function (req, res) {
+    let type = req.body.type;
+    if (!type) {
+        type = 'server';
+    }
 
-// router.post("/verify/code", function (req, res) {
-//     let swagger_scan_only = req.body.token;
-//     let token = req.cookies.token;
-//     let code = req.body.code;
+    try {
+        if (type == 'server') {
+            const fileUploadPromise = new Promise((resolve, reject) => {
+                avatarUpload.single('image')(req, res, (err) => {
+                    if (err) {
+                        reject(err); // 发生错误，拒绝 Promise 并传递错误
+                    } else {
+                        resolve(); // 完成上传，解决 Promise
+                    }
+                }
+            )});
+            
+            await fileUploadPromise;
+            
+            if (!req.file) {
+                return res.json({
+                    code: -1,
+                    message: 'no image provide'
+                });
+            }
+            
+            const path = req.file.path;
+            const fileName = req.file.filename;
+            const uri = processUserAvatarPath(path);
+            console.log(uri);
+            let uid = getUidOnPath(uri);
+            console.log(uid);
+            await user.alterUserInfo(uid, 'avatar', config.image_uri + uri);
+            res.json({
+                code: 0,
+                message: 'upload successfully',
+                data: {
+                    imageuri: config.image_uri + uri
+                }
+            });
+        }
+        else if (type == 'client') {
+            let image_path = req.body.image_path;
+            
+        }
+        else {
+            res.json({
+                code:-1,
+                message:'type error'
+            });
+        }
+    } catch (err) {
+        return errorReturn(err, res);
+    }
+})
 
-//     token = tokenCheck(token, req);
-//     if (token === null) {
-//         res.json({
-//             code:-1,
-//             message:"user not login or not token provided"
-//         });
-//         return;
-//     }
+router.post("/password/reset", async function (req, res) {
+    let username = req.body.username;
+    let email = req.body.email;
+    let authcode = req.body.authcode;
+    let password = req.body.password;
+    if (!username) {
+        if (!username && !email) {
+            return res.json({
+                code:-1,
+                message:'no username or email provide'
+            });
+        }
+        let exist = await user.queryExistsEmail(email);
+        if (!exist) {
+            return res.json({
+                code:-1,
+                message:'email does not exists'
+            });
+        }
+        verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
+    }
+    else {
+        let exist = user.queryExistsUsername(username);
+        if (!exist) {
+            return res.json({
+                code:-1,
+                message:'username does not exists'
+            });
+        }
+        verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
+    }
+})
 
-//     let info = verifyToken(token, config.token_secret);
+router.post("/verify/code", async function (req, res) {
+    let swagger_scan_only = req.body.token;
+    let token = req.cookies.token;
+    let code = req.body.code;
 
-//     user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-//         if (b) {
-//             let userInfo = r[0];
-//             let userEmail = userInfo.email;
-//             verifyVCodeForEmail(userEmail, code, b => {
-//                 if (b) {
-//                     let authcode = getNewAuthCode(userInfo.username);
-//                     res.json({
-//                         code:0,
-//                         message:'verify code successfully',
-//                         data:{
-//                             username:userInfo.username,
-//                             authcode:authcode
-//                         }
-//                     });
-//                 }
-//                 else{
-//                     res.json({
-//                         code:-1,
-//                         message:'verification code incorrect'
-//                     });
-//                 }
-//             })
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'token invalid'
-//             })
-//         }
-//     });
-// })
+    token = tokenCheck(token, req);
+    if (token === null) {
+        return res.json({
+            code:-1,
+            message:"user not login or not token provided"
+        });
+    }
 
-// router.post("/verify/code/get", function (req, res) {
-//     let token = req.cookies.token;
-//     if (!token) {
-//         token = req.body.token;
-//         if (!token) {
-//             messageShowNoToken(res);
-//             return;
-//         }
-//     }
-//     let info = verifyToken(token, config.token_secret);
-//     user.checkUserLoginInvalid(info.username, info.password, (b, r) => {
-//         if (b) {
-//             let email = r[0].email;
-//             let code = getNewVCodeForEmail(email);
-//             sendMail(email,email_config.subject,getEmailTemp(code), (e, i) => {
-//                 res.json({
-//                     code:0,
-//                     message:'email send successfully'
-//                 });
-//             });
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'token invalid'
-//             });
-//         }
-//     });
-// })
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+        if (!resultObject.isValid) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            })
+        }
+
+        let userInfo = resultObject.result[0];
+        let isCodeCorrect = verifyVCodeForEmail(userInfo.email, code);
+
+        if (!isCodeCorrect) {
+            return res.json({
+                code:-1,
+                message:'verification code incorrect'
+            });
+        }
+
+        let authcode = getNewAuthCode(userInfo.username);
+        res.json({
+            code:0,
+            message:'verify code successfully',
+            data:{
+                username:userInfo.username,
+                authcode:authcode
+            }
+        });
+    } catch (error) {
+        errorReturn(error,res)
+    }
+    
+})
+
+router.post("/verify/code/get",async function (req, res) {
+    let token = req.cookies.token;
+    if (!token) {
+        token = req.body.token;
+        if (!token) {
+            return messageShowNoToken(res);
+        }
+    }
+    try {
+        let info = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
+
+        if (!resultObject) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            });
+        }
+
+        let email = resultObject.result[0].email;
+        let code = getNewVCodeForEmail(email);
+        await sendMail(email, email_config.subject, getEmailTemp(code));
+
+        res.json({
+            code:0,
+            message:'email send successfully'
+        });
+    } catch (error) {
+        return errorReturn(error, res);
+    }
+})
 
 // router.post("/verify/code/username", function(req, res) {
 //     let username = req.body.username;
@@ -738,11 +745,7 @@ async function doLogin(username, password, req, res) {
         }
     }
     catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 }
 
@@ -760,42 +763,36 @@ async function doTokenCheckAndResponseToken(token, req, res) {
         res.json(info);
     }
     catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 }
 
 function messageShowNoToken(res) {
-    res.json({
+    return res.json({
         code:-1,
         message:"user not login or not token provided"
     });
 }
 
-// function verifyAuthCodeAndAlterPassword(uid ,username, authcode, password, res) {
-//     verifyAuthCode(username, authcode, b => {
-//         if (b) {
-//             user.alterUserInfo(uid, 'password', password, result => {
-//                 clearAuthCode(username);
-//                 res.json({
-//                     code:0,
-//                     message:'reset password successfully'
-//                 });
-//             }, {
-//                 username:username
-//             })
-//         }
-//         else {
-//             res.json({
-//                 code:-1,
-//                 message:'authorization code incorrect'
-//             });
-//         }
-//     });
-// }
+async function verifyAuthCodeAndAlterPassword(uid ,username, authcode, password, res) {
+    try {
+        let correction = await verifyAuthCode(username, authcode);
+        if (!correction) {
+            return res.json({
+                code:-1,
+                message:'authorization code incotrrect'
+            });
+        }
+
+        await user.alterUserInfo(uid, 'password', password, {username:username});
+        res.json({
+            code:0,
+            message:'reset password successfully'
+        });
+    } catch (error) {
+        return errorReturn(error, res);
+    }
+}
 
 // function checkEmailOrUsernameExistsAndSendMessage(result, res) {
 //     if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
@@ -811,5 +808,13 @@ function messageShowNoToken(res) {
 //         });
 //     }
 // }
+
+function errorReturn(err ,res) {
+    return res.status(500).json({
+        code:500,
+        message:'error occupied',
+        data:err
+    });
+}
 
 module.exports = router;

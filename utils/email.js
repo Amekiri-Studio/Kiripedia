@@ -21,7 +21,7 @@ async function sendMail(to, subject, html) {
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.log(error);
-                reject(error);
+                return reject(error);
             }
             console.log('Message %s sent: %s', info.messageId, info.response);
             resolve(info);
