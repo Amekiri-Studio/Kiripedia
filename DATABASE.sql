@@ -29,7 +29,7 @@ create table if not exists `encyclopedia_content` (
     `eid` INT UNSIGNED NOT NULL,
     `title` VARCHAR(200) NOT NULL,
     `describe` VARCHAR(200) NOT NULL,
-    `create_date` DATETIME NOT NULL,
+    `create_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `createrid` INT UNSIGNED NOT NULL,
     `lasteditorid` INT UNSIGNED NOT NULL,
     `content` LONGTEXT,
