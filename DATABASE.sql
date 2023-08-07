@@ -93,12 +93,13 @@ create table if not exists `user_login_record`(
 
 create table if not exists `language`(
     `language_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `language_abbr` CHAR(50),
     `language_name` VARCHAR(100),
     PRIMARY KEY ( language_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-insert into language (language_name)
-    values ('简体中文'),('繁體中文'),('English'),('日本語'),('한국어'),('Русский');
+insert into language (language_name, language_abbr)
+    values ('简体中文', 'zh-cn'),('繁體中文', 'zh-tw'),('English', 'en-us'),('日本語', 'ja-jp'),('한국어', 'ko-kr'),('Русский', 'ru-ru');
 
 insert into user_groups (user_group_name,permission)
     values ('root',31);
