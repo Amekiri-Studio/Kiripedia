@@ -1,5 +1,12 @@
-const mysql = require(config.mysql_type === 2 ? 'mysql2' : 'mysql');
 var myconfig = require("../config/mysql");
+var config = require("../config/config");
+
+if (config.mysql_type === 2) {
+    mysql = require("mysql2");
+}
+else {
+    mysql = require("mysql");
+}
 
 var pool = mysql.createPool({
     host:   myconfig.host,
@@ -9,14 +16,15 @@ var pool = mysql.createPool({
 })
 
 async function getConnection() {
-    try {
-        const connection = await pool.getConnection();
-        console.log('Connected to mysql');
-        return connection;
-    } catch (err) {
-        console.error(err.message);
-        throw err;
-    }
+    return new Promise((resolve, reject) => {
+        pool.getConnection((err, connection) => {
+            if (err) {
+                console.log(err);
+                return reject(err);
+            }
+            resolve(connection);
+        })
+    })
 }
 
 module.exports = { getConnection };
