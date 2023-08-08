@@ -41,9 +41,10 @@ create table if not exists `encyclopedia_content` (
 create table if not exists `encyclopedia_contribution` (
     `contru_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `eid` INT UNSIGNED NOT NULL,
+    `ecid` INT UNSIGNED NOT NULL,
     `userid` INT UNSIGNED NOT NULL,
     `language` INT UNSIGNED,
-    PRIMARY KEY ( counru_id )
+    PRIMARY KEY ( contru_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table if not exists `user_groups` (
@@ -109,3 +110,58 @@ insert into user_groups (user_group_name,permission)
 
 insert into user_groups (user_group_name,permission)
     values ('user',1);
+
+CREATE TABLE if not exists user_email_backup (
+    backup_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    userid INT UNSIGNED NOT NULL,
+    email VARCHAR(255),
+    backup_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE if not exists encyclopedia_backup (
+    backup_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    eid INT UNSIGNED NOT NULL,
+    ecid INT UNSIGNED NOT NULL,
+    `title` VARCHAR(200) NOT NULL,
+    `describe` VARCHAR(200) NOT NULL,
+    `lasteditorid` INT UNSIGNED NOT NULL,
+    `content` LONGTEXT
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE if not exists contribution_backup (
+    backup_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    eid INT UNSIGNED NOT NULL,
+    ecid INT UNSIGNED NOT NULL,
+    userid INT UNSIGNED NOT NULL
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TRIGGER backup_users_email BEFORE UPDATE ON `user`
+FOR EACH ROW
+BEGIN
+    INSERT INTO user_email_backup (userid,email)
+    VALUES (OLD.userid,OLD.email);
+END;
+
+CREATE TRIGGER backup_encyclopedias BEFORE UPDATE ON `encyclopedia_content`
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE var_userid INT UNSIGNED;
+    DECLARE cur CURSOR FOR SELECT userid FROM encyclopedia_contribution WHERE eid = OLD.eid AND ecid = OLD.e_content_id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    INSERT INTO encyclopedia_backup(eid,ecid,title,`describe`,lasteditorid,`content`) 
+        VALUES(OLD.eid,OLD.e_content_id,OLD.title,OLD.describe,OLD.lasteditorid,OLD.content);
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO var_userid;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        INSERT INTO contribution_backup(eid,ecid,userid) VALUES(OLD.eid,OLD.e_content_id,var_userid);
+        
+    END LOOP;
+
+    CLOSE cur;
+END;
