@@ -16,7 +16,13 @@ router.get('/',function (req,res) {
 })
 
 router.get("/logo",function (req,res) {
-    res.send(config.website_logo);
+    res.json({
+        code:0,
+        message:'query ok',
+        data:{
+            uri:config.website_logo
+        }
+    });
 })
 
 router.get("/language",function (req,res){
