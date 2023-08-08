@@ -28,6 +28,22 @@ function sqlConnect() {
             }
         });
     }
+    else {
+        if (connection){
+
+        }
+        else {
+            connection.connect((err) => {
+                if (err) {
+                    console.log(err.message);
+                }
+                else {
+                    console.log("Connected to mysql");
+                    isConnection = true;
+                }
+            });
+        }
+    }
 }
 
 function getConnectionStatus() {

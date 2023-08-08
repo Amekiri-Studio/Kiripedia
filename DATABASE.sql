@@ -125,7 +125,8 @@ CREATE TABLE if not exists encyclopedia_backup (
     `title` VARCHAR(200) NOT NULL,
     `describe` VARCHAR(200) NOT NULL,
     `lasteditorid` INT UNSIGNED NOT NULL,
-    `content` LONGTEXT
+    `content` LONGTEXT,
+    backup_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE if not exists contribution_backup (
