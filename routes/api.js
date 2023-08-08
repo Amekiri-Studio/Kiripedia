@@ -19,8 +19,24 @@ router.get("/logo",function (req,res) {
 })
 
 router.get("/language",function (req,res){
+    // 获取 Accept-Language 头部内容
+    const acceptLanguageHeader = req.get('Accept-Language');
+
+    // 将 Accept-Language 头部内容解析为语言标签数组
+    const languages = acceptLanguageHeader.split(',');
+
+    // 提取第一个语言标签作为用户首选语言
+    const userPreferredLanguage = languages[0];
+
+    // 返回用户首选语言
+    // res.send(`Your preferred language is: ${userPreferredLanguage}`);
     res.json({
-        message:'api invalid temporary'
+        code:0,
+        message:'Get local language successfully',
+        data:{
+            languages:languages,
+            preferred:userPreferredLanguage
+        }
     });
 })
 

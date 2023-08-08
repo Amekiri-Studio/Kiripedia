@@ -235,8 +235,8 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -252,8 +252,8 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -317,6 +317,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -335,6 +338,12 @@
                   "example": "any"
                 },
                 "nickname": {
+                  "example": "any"
+                },
+                "type": {
+                  "example": "any"
+                },
+                "image_path": {
                   "example": "any"
                 }
               }
@@ -359,6 +368,12 @@
               "type": "object",
               "properties": {
                 "type": {
+                  "example": "any"
+                },
+                "token": {
+                  "example": "any"
+                },
+                "image_path": {
                   "example": "any"
                 }
               }
@@ -420,6 +435,12 @@
                 },
                 "code": {
                   "example": "any"
+                },
+                "type": {
+                  "example": "any"
+                },
+                "image_path": {
+                  "example": "any"
                 }
               }
             }
@@ -443,6 +464,12 @@
               "type": "object",
               "properties": {
                 "token": {
+                  "example": "any"
+                },
+                "type": {
+                  "example": "any"
+                },
+                "image_path": {
                   "example": "any"
                 }
               }
@@ -471,6 +498,15 @@
                 },
                 "code": {
                   "example": "any"
+                },
+                "type": {
+                  "example": "any"
+                },
+                "token": {
+                  "example": "any"
+                },
+                "image_path": {
+                  "example": "any"
                 }
               }
             }
@@ -497,6 +533,15 @@
                   "example": "any"
                 },
                 "code": {
+                  "example": "any"
+                },
+                "type": {
+                  "example": "any"
+                },
+                "token": {
+                  "example": "any"
+                },
+                "image_path": {
                   "example": "any"
                 }
               }
@@ -533,6 +578,92 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/encyclopedia/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/encyclopedia/get": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/encyclopedia/search": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/encyclopedia/create": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "lang": {
+                  "example": "any"
+                },
+                "title": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }
