@@ -40,7 +40,55 @@ async function queryEncyclopediaByKeyword(keyword, lang) {
     });
 }
 
+async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit) {
+    try {
+        return new Promise((resolve, reject) => {
+            mysql.sqlConnect();
+  
+            const querySql = `
+                SELECT *
+                FROM encyclopedia AS e
+                INNER JOIN encyclopedia_content AS ec ON e.id = ec.encyclopedia_id
+                INNER JOIN language AS l ON l.language_id = ec.language
+                WHERE l.language_abbr = ?
+                AND (ec.title LIKE ? OR ec.describe LIKE ? OR ec.content LIKE ?)
+                ORDER BY
+                    CASE
+                    WHEN ec.title LIKE ? THEN 1
+                    WHEN ec.describe LIKE ? THEN 2
+                    WHEN ec.content LIKE ? THEN 3
+                    ELSE 4
+                END
+                LIMIT ? OFFSET ?
+            `;
+  
+            const params = [
+                lang,
+                `%${keyword}%`,
+                `%${keyword}%`,
+                `%${keyword}%`,
+                `%${keyword}%`,
+                `%${keyword}%`,
+                `%${keyword}%`,
+                limit,
+                start,
+            ];
+  
+            mysql.connection.query(querySql, params, (err, results, fields) => {
+            if (err) {
+                return reject(err);
+            }
+  
+            resolve(results);
+        });
+      });
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     queryEncyclopediaById,
-    queryEncyclopediaByKeyword
+    queryEncyclopediaByKeyword,
+    queryEncyclopediaByKeywordWithRange
 }
