@@ -76,14 +76,6 @@ create table if not exists `blockip` (
     PRIMARY KEY ( record_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create table if not exists `change_logs` (
-    `log_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
-    `log_type` TINYINT NOT NULL,
-    `old` LONGTEXT,
-    `new` LONGTEXT,
-    PRIMARY KEY ( log_id )
-)ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 create table if not exists `user_login_record`(
     `log_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `userid` INT UNSIGNED NOT NULL,

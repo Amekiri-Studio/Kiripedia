@@ -854,6 +854,7 @@ async function verifyAuthCodeAndAlterPassword(uid ,username, authcode, password,
 // }
 
 function errorReturn(err ,res) {
+    console.log(err);
     return res.status(500).json({
         code:500,
         message:'error occupied',
