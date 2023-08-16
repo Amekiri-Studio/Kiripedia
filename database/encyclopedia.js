@@ -92,7 +92,7 @@ async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit) 
             mysql.connection.query(querySql, params, (err, results, fields) => {
             if (err) {
                 return reject(err);
-            }
+            }mysql.sqlConnect();
   
             resolve(results);
         });
@@ -102,9 +102,68 @@ async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit) 
     }
 }
 
+async function addPost(eid, title, cat, describe, content, userid, lang) {
+    return new Promise((resolve, reject) => {
+        mysql.sqlConnect();
+
+        let addESql = `
+            INSERT INTO encyclopedia(category,permission) 
+            VALUES(?,1)
+        `;
+
+        let addSql = `
+            INSERT INTO encyclopedia_content(eid,title,\`describe\`,createrid,lasteditorid,content,language,permission) 
+            VALUES(?,?,?,?,?,?,(SELECT language_id FROM language where language_abbr=?),1)
+        `;
+
+        if (!eid) {
+            let eParams = [cat];
+            mysql.connection.query(addESql, eParams, (err, results, fields) => {
+                if (err) {
+                    return reject(err);
+                }
+                let params = [results.insertId ,title, describe, userid, userid, content, lang];
+                mysql.connection.query(addSql, params, (err, results, fields) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    resolve(results);
+                });
+            });
+        }
+        else {
+            let params = [eid, title, describe, userid, userid, content, lang];
+            mysql.connection.query(addSql, params, (err, results, fields) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                resolve(results);
+            });
+        }
+        
+    });
+}
+
+async function queryExistsPostOnLanguage(eid, lang) {
+    let data = await queryEncyclopediaById(eid, lang);
+
+    try {
+        if (JSON.stringify(data) === "[]" || JSON.stringify(data) === "{}") {
+            return false;
+        }
+        return true;
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     queryEncyclopediaById,
     queryEncyclopediaByKeyword,
     queryEncyclopediaCount,
-    queryEncyclopediaByKeywordWithRange
+    queryEncyclopediaByKeywordWithRange,
+    addPost,
+    queryExistsPostOnLanguage
 }

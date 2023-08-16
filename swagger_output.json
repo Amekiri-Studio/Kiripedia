@@ -606,7 +606,7 @@
         }
       }
     },
-    "/api/encyclopedia/": {
+    "/api/post/": {
       "get": {
         "description": "",
         "responses": {
@@ -616,7 +616,7 @@
         }
       }
     },
-    "/api/encyclopedia/get": {
+    "/api/post/get": {
       "get": {
         "description": "",
         "parameters": [
@@ -653,7 +653,7 @@
         }
       }
     },
-    "/api/encyclopedia/search": {
+    "/api/post/search": {
       "get": {
         "description": "",
         "parameters": [
@@ -685,10 +685,30 @@
         }
       }
     },
-    "/api/encyclopedia/create": {
+    "/api/post/create": {
       "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -698,7 +718,22 @@
                 "lang": {
                   "example": "any"
                 },
+                "eid": {
+                  "example": "any"
+                },
                 "title": {
+                  "example": "any"
+                },
+                "content": {
+                  "example": "any"
+                },
+                "describe": {
+                  "example": "any"
+                },
+                "category": {
+                  "example": "any"
+                },
+                "token": {
                   "example": "any"
                 }
               }
@@ -706,8 +741,8 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "OK"
           }
         }
       }
