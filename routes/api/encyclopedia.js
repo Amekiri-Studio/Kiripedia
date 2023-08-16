@@ -1,6 +1,9 @@
 var express = require("express");
 var router = express.Router();
 var encyclopedia = require("../../database/encyclopedia");
+const { verifyToken } = require("../../utils/verify/token");
+var config = require("../../config/config");
+var user = require("../../database/user");
 
 router.get("/", function (req, res) {
     
@@ -59,10 +62,53 @@ router.post("/create", async function (req, res) {
     let title = req.body.title;
     let content = req.body.content;
     let describe = req.body.describe;
-    let lasteditorid = req.body.lasteditorid;
+    let category = req.body.category;
+    let token = req.cookies.token;
+
+    if (!lang) {
+        lang = getBrowserFirstLanguage(req);
+    }
+
+    if (!token) {
+        token = req.body.token;
+        if (!token) {
+            return messageShowNoToken(res);
+        }
+    }
 
     try {
-        
+        let tokenInfo = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(tokenInfo.username, tokenInfo.password);
+
+        if (!resultObject.isValid) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            });
+        }
+
+        if (eid) {
+            let isExists = await encyclopedia.queryExistsPostOnLanguage(eid, lang);
+            if (isExists) {
+                return res.json({
+                    code:-1,
+                    message:'Cannot add post because post does exists'
+                });
+            }
+        }
+
+        await encyclopedia.addPost(eid, title, category, describe, content, tokenInfo.uid, lang);
+
+        res.json({
+            code:0,
+            message:'post create successfully',
+            data:{
+                title:title,
+                describe:describe,
+                category:category
+            }
+        });
+
     } catch (error) {
         return errorReturn(error, res);
     }
@@ -88,6 +134,13 @@ function errorReturn(err ,res) {
         code:500,
         message:'error occupied',
         data:err
+    });
+}
+
+function messageShowNoToken(res) {
+    return res.json({
+        code:-1,
+        message:"user not login or not token provided"
     });
 }
 
