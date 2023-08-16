@@ -34,7 +34,7 @@ create table if not exists `encyclopedia_content` (
     `lasteditorid` INT UNSIGNED NOT NULL,
     `content` LONGTEXT,
     `permission` TINYINT NOT NULL,
-    PRIMARY KEY ( e_content_id ),
+    PRIMARY KEY ( e_content_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table if not exists `encyclopedia_contribution` (
