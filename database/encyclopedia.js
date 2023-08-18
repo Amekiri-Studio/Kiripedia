@@ -1,8 +1,8 @@
 var mysql = require('./mysql_pool');
 
-async function queryEncyclopediaById(id, lang, _connection) {
+async function queryEncyclopediaById(id, lang, option) {
     return new Promise(async (resolve, reject) => {
-        let connection = _connection;
+        let connection = option.connection;
         if (!connection) {
             connection = await mysql.getConnection();
         }
@@ -22,15 +22,20 @@ async function queryEncyclopediaById(id, lang, _connection) {
             if (err) {
                 return reject(err);
             }
-            connection.release();
+            if (option.release) {
+                connection.release();
+            }
+            else if (!option.connection) {
+                connection.release();
+            }
             resolve(results);
         });
     });
 }
 
-async function queryEncyclopediaCount(lang, keyword ,_connection) {
+async function queryEncyclopediaCount(lang, keyword ,option) {
     return new Promise(async (resolve, reject) => {
-        let connection = _connection;
+        let connection = option.connection;
         if (!connection) {
             connection = await mysql.getConnection();
         }
@@ -43,22 +48,27 @@ async function queryEncyclopediaCount(lang, keyword ,_connection) {
             AND (ec.title LIKE ? OR ec.describe LIKE ? OR ec.content LIKE ?)
         `;
 
-        let params = [lang, keyword, keyword, keyword];
+        let params = [lang, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`];
 
         connection.query(querySql, params, (err, results, fields) => {
             if (err) {
                 reject(err);
             }
-            connection.release();
+            if (option.release) {
+                connection.release();
+            }
+            else if (!option.connection) {
+                connection.release();
+            }
             resolve(results);
         });
     });
 }
 
-async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit, _connection) {
+async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit, option) {
     try {
         return new Promise(async (resolve, reject) => {
-            let connection = _connection;
+            let connection = option.connection;
             if (!connection) {
                 connection = await mysql.getConnection();
             }
@@ -96,7 +106,12 @@ async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit, 
                 if (err) {
                     return reject(err);
                 };
-  
+                if (option.release) {
+                    connection.release();
+                }
+                else if (!option.connection) {
+                    connection.release();
+                }
                 resolve(results);
             });
       });
@@ -105,9 +120,9 @@ async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit, 
     }
 }
 
-async function addPost(eid, title, cat, describe, content, userid, lang) {
+async function addPost(eid, title, cat, describe, content, userid, lang, option) {
     return new Promise(async (resolve, reject) => {
-        let connection = _connection;
+        let connection = option.connection;
         if (!connection) {
             connection = await mysql.getConnection();
         }
@@ -134,7 +149,12 @@ async function addPost(eid, title, cat, describe, content, userid, lang) {
                         return reject(err);
                     }
 
-                    connection.release();
+                    if (option.release) {
+                        connection.release();
+                    }
+                    else if (!option.connection) {
+                        connection.release();
+                    }
                     resolve(results);
                 });
             });
@@ -146,7 +166,12 @@ async function addPost(eid, title, cat, describe, content, userid, lang) {
                     return reject(err);
                 }
 
-                connection.release();
+                if (option.release) {
+                    connection.release();
+                }
+                else if (!option.connection) {
+                    connection.release();
+                }
                 resolve(results);
             });
         }
@@ -154,8 +179,12 @@ async function addPost(eid, title, cat, describe, content, userid, lang) {
     });
 }
 
-async function queryExistsPostOnLanguage(eid, lang) {
-    let data = await queryEncyclopediaById(eid, lang);
+async function queryExistsPostOnLanguage(eid, lang, option) {
+    let connection = option.connection;
+    if (!connection) {
+        connection = await mysql.getConnection();
+    }
+    let data = await queryEncyclopediaById(eid, lang,{connection, release:option.release});
 
     try {
         if (JSON.stringify(data) === "[]" || JSON.stringify(data) === "{}") {
