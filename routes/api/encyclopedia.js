@@ -17,7 +17,7 @@ router.get("/get", async function (req, res) {
     }
 
     try {
-        let result = await encyclopedia.queryEncyclopediaById(eid,lang);
+        let result = await encyclopedia.queryEncyclopediaById(parseInt(eid),lang);
         res.json({
             code:0,
             message:'query ok',
@@ -41,7 +41,7 @@ router.get("/search", async function (req, res) {
     }
 
     try {
-        let count = await encyclopedia.queryEncyclopediaCount();
+        let count = await encyclopedia.queryEncyclopediaCount(lang);
         let result = await encyclopedia.queryEncyclopediaByKeywordWithRange(keyword, lang, parseInt(start), parseInt(limit));
         res.json({
             code:0,

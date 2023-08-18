@@ -1,64 +1,66 @@
-var mysql = require('./mysql_connection');
+var mysql = require('./mysql_pool');
 
-async function queryEncyclopediaById(id, lang) {
-    return new Promise((resolve, reject) => {
-        mysql.sqlConnect();
+async function queryEncyclopediaById(id, lang, _connection) {
+    return new Promise(async (resolve, reject) => {
+        let connection = _connection;
+        if (!connection) {
+            connection = await mysql.getConnection();
+        }
 
-        let querySql = "select * from encyclopedia as e," +
-         "encyclopedia_content as ec," + 
-         "language as l " +
-         "where l.language_id=ec.language and l.language_abbr=? and e.eid=?";
+        let querySql = `
+            SELECT * FROM
+            encyclopedia as e 
+            INNER JOIN encyclopedia_content AS ec ON e.eid = ec.eid
+            INNER JOIN language AS l ON l.language_id = ec.language
+            WHERE l.language_abbr = ?
+            AND e.eid = ?
+        `;
 
         let params = [lang, id];
 
-        mysql.connection.query(querySql, params, (err, results, field) => {
+        connection.query(querySql, params, (err, results, field) => {
             if (err) {
                 return reject(err);
             }
+            connection.release();
             resolve(results);
         });
     });
 }
 
-async function queryEncyclopediaByKeyword(keyword, lang) {
-    return new Promise((resolve,reject) => {
-        mysql.sqlConnect();
+async function queryEncyclopediaCount(lang ,_connection) {
+    return new Promise(async (resolve, reject) => {
+        let connection = _connection;
+        if (!connection) {
+            connection = await mysql.getConnection();
+        }
 
-        let querySql = "select * from encyclopedia as e," +
-         "encyclopedia_content as ec," + 
-         "language as l " +
-         "where l.language_id=ec.language and l.language_abbr=? and (ec.title like ? or ec.describe like ? or ec.content like ?)";
+        const querySql = `
+            SELECT count(*) FROM encyclopedia AS e
+            INNER JOIN encyclopedia_content AS ec ON e.eid = ec.eid
+            INNER JOIN language AS l ON l.language_id = ec.language
+            WHERE l.language_abbr = ?
+        `;
 
-        const params = [lang, `%${keyword}%`, `%${keyword}%`, `%${keyword}%`];
+        let params = [lang];
 
-        mysql.connection.query(querySql, params, (err, results, field) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(results);
-         });
-    });
-}
-
-async function queryEncyclopediaCount() {
-    return new Promise((resolve, reject) => {
-        mysql.sqlConnect();
-
-        const querySql = `SELECT count(*) FROM encyclopedia`;
-
-        mysql.connection.query(querySql, (err, results, fields) => {
+        connection.query(querySql, params, (err, results, fields) => {
             if (err) {
                 reject(err);
             }
+            connection.release();
             resolve(results);
         });
     });
 }
 
-async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit) {
+async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit, _connection) {
     try {
-        return new Promise((resolve, reject) => {
-            mysql.sqlConnect();
+        return new Promise(async (resolve, reject) => {
+            let connection = _connection;
+            if (!connection) {
+                connection = await mysql.getConnection();
+            }
   
             const querySql = `
                 SELECT *
@@ -89,13 +91,13 @@ async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit) 
                 start,
             ];
   
-            mysql.connection.query(querySql, params, (err, results, fields) => {
-            if (err) {
-                return reject(err);
-            }mysql.sqlConnect();
+            connection.query(querySql, params, (err, results, fields) => {
+                if (err) {
+                    return reject(err);
+                };
   
-            resolve(results);
-        });
+                resolve(results);
+            });
       });
     } catch (error) {
         throw error;
@@ -103,8 +105,11 @@ async function queryEncyclopediaByKeywordWithRange(keyword, lang, start, limit) 
 }
 
 async function addPost(eid, title, cat, describe, content, userid, lang) {
-    return new Promise((resolve, reject) => {
-        mysql.sqlConnect();
+    return new Promise(async (resolve, reject) => {
+        let connection = _connection;
+        if (!connection) {
+            connection = await mysql.getConnection();
+        }
 
         let addESql = `
             INSERT INTO encyclopedia(category,permission) 
@@ -118,27 +123,29 @@ async function addPost(eid, title, cat, describe, content, userid, lang) {
 
         if (!eid) {
             let eParams = [cat];
-            mysql.connection.query(addESql, eParams, (err, results, fields) => {
+            connection.query(addESql, eParams, (err, results, fields) => {
                 if (err) {
                     return reject(err);
                 }
                 let params = [results.insertId ,title, describe, userid, userid, content, lang];
-                mysql.connection.query(addSql, params, (err, results, fields) => {
+                connection.query(addSql, params, (err, results, fields) => {
                     if (err) {
                         return reject(err);
                     }
 
+                    connection.release();
                     resolve(results);
                 });
             });
         }
         else {
             let params = [eid, title, describe, userid, userid, content, lang];
-            mysql.connection.query(addSql, params, (err, results, fields) => {
+            connection.query(addSql, params, (err, results, fields) => {
                 if (err) {
                     return reject(err);
                 }
 
+                connection.release();
                 resolve(results);
             });
         }
@@ -161,7 +168,6 @@ async function queryExistsPostOnLanguage(eid, lang) {
 
 module.exports = {
     queryEncyclopediaById,
-    queryEncyclopediaByKeyword,
     queryEncyclopediaCount,
     queryEncyclopediaByKeywordWithRange,
     addPost,
