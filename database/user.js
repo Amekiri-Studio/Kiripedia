@@ -22,7 +22,7 @@ async function createUser(username,nickname,password,email,group,option) {
                 console.log(err.message);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             resolve(results);
         });
     });
@@ -49,7 +49,7 @@ async function queryExistsUsername(username, option) {
                 console.log(err.message);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             if (JSON.stringify(results) === "[]" || JSON.stringify(results) === "{}") {
                 resolve(false);
             }
@@ -81,7 +81,7 @@ async function getUserInfoByUsername(username, option) {
                 console.log(err.message);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             resolve(results);
         });
     });
@@ -108,7 +108,7 @@ async function queryExistsEmail(email, option) {
                 console.log(err.message);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             if (JSON.stringify(results) === "[]" || JSON.stringify(results) === "{}") {
                 resolve(false);
             }
@@ -140,7 +140,7 @@ async function getUserInfoByEmail(email, option) {
                 console.log(err.message);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             resolve(results);
         });
     });
@@ -185,7 +185,7 @@ async function userLogin(username, password, option) {
                 console.log(err);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
                 resolve({status:false});
             }
@@ -217,7 +217,7 @@ async function checkUserLoginInvalid(username, password_hash, option) {
                 console.log(err);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
                 resolve({ isValid:false });
             }
@@ -268,7 +268,7 @@ async function alterUserInfo(uid, type, content, option) {
                 console.log(err);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             resolve(result);
         });
     });
@@ -294,7 +294,7 @@ async function queryUserId(userid, option) {
                 console.log(err);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             resolve(result);
         })
     });
@@ -326,19 +326,10 @@ async function removeUser(userid, option) {
                 console.log(err);
                 return reject(err);
             }
-            connectionRelease(option, connection);
+            mysql.connectionRelease(option, connection);
             resolve(result);
         });
     });
-}
-
-function connectionRelease(option, connection) {
-    if (!option) {
-        connection.release();
-    }
-    else if (option.release) {
-        connection.release();
-    }
 }
 
 module.exports = {

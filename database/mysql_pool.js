@@ -27,4 +27,13 @@ async function getConnection() {
     })
 }
 
-module.exports = { getConnection };
+function connectionRelease(option, connection) {
+    if (!option) {
+        connection.release();
+    }
+    else if (option.release) {
+        connection.release();
+    }
+}
+
+module.exports = { getConnection, connectionRelease };
