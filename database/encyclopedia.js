@@ -28,7 +28,7 @@ async function queryEncyclopediaById(id, lang, _connection) {
     });
 }
 
-async function queryEncyclopediaCount(lang ,_connection) {
+async function queryEncyclopediaCount(lang, keyword ,_connection) {
     return new Promise(async (resolve, reject) => {
         let connection = _connection;
         if (!connection) {
@@ -40,9 +40,10 @@ async function queryEncyclopediaCount(lang ,_connection) {
             INNER JOIN encyclopedia_content AS ec ON e.eid = ec.eid
             INNER JOIN language AS l ON l.language_id = ec.language
             WHERE l.language_abbr = ?
+            AND (ec.title LIKE ? OR ec.describe LIKE ? OR ec.content LIKE ?)
         `;
 
-        let params = [lang];
+        let params = [lang, keyword, keyword, keyword];
 
         connection.query(querySql, params, (err, results, fields) => {
             if (err) {

@@ -41,7 +41,7 @@ router.get("/search", async function (req, res) {
     }
 
     try {
-        let count = await encyclopedia.queryEncyclopediaCount(lang);
+        let count = await encyclopedia.queryEncyclopediaCount(lang, keyword);
         let result = await encyclopedia.queryEncyclopediaByKeywordWithRange(keyword, lang, parseInt(start), parseInt(limit));
         res.json({
             code:0,
