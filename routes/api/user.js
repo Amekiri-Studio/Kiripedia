@@ -127,7 +127,7 @@ router.post('/login', async function (req, res) {
     else {
         try {
             let info = verifyToken(token, config.token_secret);
-            let resultObject = await user.checkInfoIsLegal(info.username, info.password);
+            let resultObject = await user.checkUserLoginInvalid(info.username, info.password);
             if (resultObject.isValid) {
                 return res.json({
                     code:-1,
@@ -136,6 +136,7 @@ router.post('/login', async function (req, res) {
             }
             doLogin(username,password,req,res);
         } catch (err) {
+            console.log(err);
             return res.json({
                 code:-1,
                 message:'error occupied',
