@@ -1,167 +1,94 @@
 var mysql = require('./mysql_pool');
 var { hash_pwd } = require("../utils/password_hash");
 
-async function createUser(username,nickname,password,email,group,option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
+async function createUser(username, nickname, password, email, group, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
 
-        let addSql = 'INSERT INTO user(username,nickname,password,email,user_belong_groups,user_status) VALUES(?,?,?,?,?,?)';
-        let params = [username,nickname,hash_pwd(username,password),email,group,0];
-    
-        connection.query(addSql,params,(err ,results, fields) => {
-            if (err) {
-                console.log(err.message);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            resolve(results);
-        });
-    });
+        const addSql = 'INSERT INTO user(username, nickname, password, email, user_belong_groups, user_status) VALUES (?, ?, ?, ?, ?, ?)';
+        const params = [username, nickname, hash_pwd(username, password), email, group, 0];
+
+        const results = await mysql.query(connection, addSql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return results;
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function queryExistsUsername(username, option) {
-    return new Promise(async (resolve,reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
+async function queryExistsUsername(username, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
 
-        let querySql = "SELECT * FROM user where username=?";
-        let params = [username];
-    
-        connection.query(querySql,params,(err, results, fields) => {
-            if (err) {
-                console.log(err.message);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            if (JSON.stringify(results) === "[]" || JSON.stringify(results) === "{}") {
-                resolve(false);
-            }
-            else {
-                resolve(true);
-            }
-        });
-    });
+        const querySql = "SELECT * FROM user WHERE username=?";
+        const params = [username];
+
+        const results = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        if (results.length === 0) {
+            return false; // 用户名不存在
+        } else {
+            return true; // 用户名存在
+        }
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function getUserInfoByUsername(username, option) {
-    return new Promise(async (resolve,reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
+async function getUserInfoByUsername(username, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
 
-        let querySql = "SELECT * FROM user where username=?";
-        let params = [username];
-    
-        connection.query(querySql,params,(err, results, fields) => {
-            if (err) {
-                console.log(err.message);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            resolve(results);
-        });
-    });
+        const querySql = "SELECT * FROM user WHERE username=?";
+        const params = [username];
+
+        const results = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return results;
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function queryExistsEmail(email, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
 
-        let querySql = "SELECT * FROM user where email=?";
-        let params = [email];
-    
-        connection.query(querySql,params,(err, results, fields) => {
-            if (err) {
-                console.log(err.message);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            if (JSON.stringify(results) === "[]" || JSON.stringify(results) === "{}") {
-                resolve(false);
-            }
-            else {
-                resolve(true);
-            }
-        });
-    });
+async function queryExistsEmail(email, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
+
+        const querySql = "SELECT * FROM user WHERE email=?";
+        const params = [email];
+
+        const results = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return results.length > 0;
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function getUserInfoByEmail(email, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
+async function getUserInfoByEmail(email, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
 
-        let querySql = "SELECT * FROM user where email=?";
-        let params = [email];
-    
-        connection.query(querySql,params,(err, results, fields) => {
-            if (err) {
-                console.log(err.message);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            resolve(results);
-        });
-    });
-}
+        const querySql = "SELECT * FROM user WHERE email=?";
+        const params = [email];
 
-function checkInfoIsLegal(username, email, uecallback, eecallback, callback) {
-    queryExistsUsername(username, result => {
-        if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-            queryExistsEmail(email, result => {
-                if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-                    callback(result);
-                }
-                else {
-                    eecallback();
-                }
-            });
-        }
-        else {
-            uecallback();
-        }
-    });
+        const results = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return results;
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function userLogin(username, password, option) {
@@ -338,7 +265,6 @@ module.exports = {
     queryExistsEmail,
     getUserInfoByUsername,
     getUserInfoByEmail,
-    checkInfoIsLegal,
     userLogin,
     checkUserLoginInvalid,
     alterUserInfo,
