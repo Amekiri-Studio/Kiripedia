@@ -109,6 +109,13 @@ CREATE TABLE if not exists user_email_backup (
     backup_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE if not exists user_nickname_backup (
+    backup_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    userid INT UNSIGNED NOT NULL,
+    nickname VARCHAR(255),
+    backup_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE if not exists encyclopedia_backup (
     backup_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     eid INT UNSIGNED NOT NULL,
@@ -131,6 +138,9 @@ CREATE TRIGGER backup_users_email BEFORE UPDATE ON `user`
 FOR EACH ROW
 BEGIN
     INSERT INTO user_email_backup (userid,email)
+    VALUES (OLD.userid,OLD.email);
+
+    INSERT INTO user_nickname_backup (userid,email)
     VALUES (OLD.userid,OLD.email);
 END;
 
