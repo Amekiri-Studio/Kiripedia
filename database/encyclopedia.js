@@ -110,6 +110,11 @@ async function addPost(eid, title, cat, describe, content, userid, lang, option 
             VALUES(?, ?, ?, ?, ?, ?, (SELECT language_id FROM language WHERE language_abbr = ?), 1)
         `;
 
+        let addContributeSql = `
+            INSERT INTO encyclopedia_contribution(eid,ecid,userid,language) 
+            VALUES(?, ?, ?, (SELECT language_id FROM language WHERE language_abbr = ?))
+        `;
+
         let params = [];
         if (!eid) {
             const eParams = [cat];
@@ -119,6 +124,10 @@ async function addPost(eid, title, cat, describe, content, userid, lang, option 
 
         params = [eid, title, describe, userid, userid, content, lang];
         const results = await mysql.query(connection, addSql, params);
+
+        let contruParams = [eid, results.insertId, userid, lang];
+
+        await mysql.query(connection, addContributeSql, contruParams);
 
         await mysql.commitTransaction(connection);
 

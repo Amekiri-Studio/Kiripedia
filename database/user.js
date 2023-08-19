@@ -138,19 +138,14 @@ async function alterUserInfo(uid, type, content, option = {}) {
             updateSql = "UPDATE user SET email=? WHERE userid=?";
         } else if (type === 'password') {
             updateSql = "UPDATE user SET password=? WHERE userid=?";
+            content = hash_pwd(option.username, content);
         } else if (type === 'nickname') {
             updateSql = "UPDATE user SET nickname=? WHERE userid=?";
         } else if (type === 'avatar') {
             updateSql = "UPDATE user SET avatar=? WHERE userid=?";
         }
 
-        let params = [];
-        if (type === 'password') {
-            params = [hash_pwd(option.username, content), uid];
-        }
-        else {
-            params = [content, uid];
-        }
+        let params = [content, uid];
 
         const result = await mysql.query(connection, updateSql, params);
 
