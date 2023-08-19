@@ -8,7 +8,7 @@ async function test() {
             WHERE language_abbr = ?
             AND ec.eid = ?
         `;
-    return await mysql.query(connection, querySql, ['zh-cn', 1]);
+    return await mysql.query(connection, querySql, ['zh-cn', 2]);
 }
 
 test().then(result => {

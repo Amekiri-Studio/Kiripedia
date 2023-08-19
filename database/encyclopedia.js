@@ -188,7 +188,7 @@ async function alterPost(eid, title, describe, content, userid, lang, option = {
         `;
 
         let params = [title, describe, userid, content, eid, lang];
-        let ecidParams = [lang];
+        let ecidParams = [lang, eid];
         
         const result = await mysql.query(connection, updateSql, params);
         let ecid = await mysql.query(connection, querySql, ecidParams);
