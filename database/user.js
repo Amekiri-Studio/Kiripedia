@@ -91,172 +91,117 @@ async function getUserInfoByEmail(email, option = {}) {
     }
 }
 
-async function userLogin(username, password, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
-    
-        let querySql = "SELECT * FROM user where username=? and password=?"
-        let params = [username, hash_pwd(username,password)];
-    
-        connection.query(querySql, params, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-                resolve({status:false});
-            }
-            else {
-                resolve({status:true, result});
-            }
-        });
-    });
+async function userLogin(username, password, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
+
+        const querySql = "SELECT * FROM user WHERE username=? AND password=?";
+        const params = [username, hash_pwd(username, password)];
+
+        const result = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return result.length > 0
+            ? { status: true, result }
+            : { status: false };
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function checkUserLoginInvalid(username, password_hash, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
+async function checkUserLoginInvalid(username, password_hash, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
 
-        let querySql = "SELECT * FROM user where username=? and password=?"
-        let params = [username, password_hash];
+        const querySql = "SELECT * FROM user WHERE username=? AND password=?";
+        const params = [username, password_hash];
 
-        connection.query(querySql, params, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-                resolve({ isValid:false });
-            }
-            else {
-                resolve({ isValid:true, result });
-            }
-        });
-    });
+        const result = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return result.length === 0
+            ? { isValid: false }
+            : { isValid: true, result };
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function alterUserInfo(uid, type, content, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
+async function alterUserInfo(uid, type, content, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
         let updateSql;
 
         if (type === 'email') {
-            updateSql = "update user set email=? where userid=?";
-        }
-        else if (type === 'password') {
-            updateSql = "update user set password=? where userid=?";
-        }
-        else if (type === 'nickname') {
-            updateSql = "update user set nickname=? where userid=?";
-        }
-        else if (type === 'avatar') {
-            updateSql = "update user set avatar=? where userid=?";
+            updateSql = "UPDATE user SET email=? WHERE userid=?";
+        } else if (type === 'password') {
+            updateSql = "UPDATE user SET password=? WHERE userid=?";
+        } else if (type === 'nickname') {
+            updateSql = "UPDATE user SET nickname=? WHERE userid=?";
+        } else if (type === 'avatar') {
+            updateSql = "UPDATE user SET avatar=? WHERE userid=?";
         }
 
-        let params;
+        let params = [];
         if (type === 'password') {
-            params = [hash_pwd(option.username,content), uid];
+            params = [hash_pwd(option.username, content), uid];
         }
         else {
             params = [content, uid];
         }
 
-        connection.query(updateSql, params, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            resolve(result);
-        });
-    });
+        const result = await mysql.query(connection, updateSql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return result;
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function queryUserId(userid, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
-        let querySql = "SELECT * FROM user where userid=?";
-        let params = [userid];
 
-        connection.query(querySql, params, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            resolve(result);
-        })
-    });
+async function queryUserId(userid, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
+
+        const querySql = "SELECT * FROM user WHERE userid=?";
+        const params = [userid];
+
+        const result = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return result;
+    } catch (error) {
+        throw error;
+    }
 }
 
-async function removeUser(userid, option) {
-    return new Promise(async (resolve, reject) => {
-        let connection;
-        if (!option) {
-            connection = await mysql.getConnection();
-        }
-        else if (!option.connection) {
-            connection = await mysql.getConnection();
-        }
-        else {
-            connection = option.connection;
-        }
-        let updateSql = `
+async function removeUser(userid, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
+
+        const updateSql = `
             UPDATE user 
             SET email='USER REMOVED', 
             avatar='USER REMOVED', 
             password='USER REMOVED', 
-            user_status=-1 WHERE userid=?
+            user_status=-1 
+            WHERE userid=?
         `;
-        let params = [userid];
-    
-        connection.query(updateSql, params, (err, result, fields) => {
-            if (err) {
-                console.log(err);
-                return reject(err);
-            }
-            mysql.connectionRelease(option, connection);
-            resolve(result);
-        });
-    });
+        const params = [userid];
+
+        const result = await mysql.query(connection, updateSql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return result;
+    } catch (error) {
+        throw error;
+    }
 }
 
 module.exports = {
