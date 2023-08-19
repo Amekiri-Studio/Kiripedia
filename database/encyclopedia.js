@@ -157,10 +157,64 @@ async function queryExistsPostOnLanguage(eid, lang, option = {}) {
     }
 }
 
+async function alterPost(eid, title, describe, content, userid, lang, option = {}) {
+    let connection;
+
+    try {
+        connection = option.connection || await mysql.getConnection();
+
+        await mysql.beginTransaction(connection);
+
+        let updateSql = `
+            UPDATE encyclopedia_content
+            SET title = ?,
+            \`describe\` = ?,
+            lasteditorid = ?,
+            content = ?
+            WHERE eid = ?
+            AND language = (SELECT language_id FROM language WHERE language_abbr = ?)
+        `;
+
+        let addContributeSql = `
+            INSERT INTO encyclopedia_contribution(eid,ecid,userid,language) 
+            VALUES(?, ?, ?, (SELECT language_id FROM language WHERE language_abbr = ?))
+        `;
+
+        let querySql = `
+            SELECT e_content_id FROM encyclopedia_content as ec
+            INNER JOIN language AS l ON l.language_id = ec.language
+            WHERE language_abbr = ?
+            AND ec.eid = ?
+        `;
+
+        let params = [title, describe, userid, content, eid, lang];
+        let ecidParams = [lang];
+        
+        const result = await mysql.query(connection, updateSql, params);
+        let ecid = await mysql.query(connection, querySql, ecidParams);
+
+        let contriParams = [eid, ecid[0].e_content_id, userid, lang];
+
+        await mysql.query(connection, addContributeSql, contriParams);
+
+        await mysql.commitTransaction(connection);
+
+        mysql.connectionRelease(option, connection);
+
+        return result;
+    } catch (error) {
+        if (connection) {
+            await mysql.rollbackTransaction(connection);
+        }
+        throw error;
+    }
+}
+
 module.exports = {
     queryEncyclopediaById,
     queryEncyclopediaCount,
     queryEncyclopediaByKeywordWithRange,
     addPost,
-    queryExistsPostOnLanguage
+    queryExistsPostOnLanguage,
+    alterPost
 }
