@@ -51,7 +51,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-mysqlConnection.sqlConnect();
 redisConnection.connectRedis();
 
 module.exports = app;
