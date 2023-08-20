@@ -97,18 +97,60 @@ router.post("/create", async function (req, res) {
             }
         }
 
-        await encyclopedia.addPost(eid, title, category, describe, content, tokenInfo.uid, lang);
+        let insertResult = await encyclopedia.addPost(eid, title, category, describe, content, tokenInfo.uid, lang);
 
         res.json({
             code:0,
             message:'post create successfully',
             data:{
+                id:insertResult.insertId,
                 title:title,
                 describe:describe,
                 category:category
             }
         });
 
+    } catch (error) {
+        return errorReturn(error, res);
+    }
+})
+
+router.post('/alter', async function (req, res) {
+    let lang = req.body.id;
+    let eid = req.body.eid;
+    let title = req.body.title;
+    let content = req.body.content;
+    let describe = req.body.describe;
+    let token = req.cookies.token;
+
+    if (!lang) {
+        lang = getBrowserFirstLanguage(req);
+    }
+
+    if (!token) {
+        token = req.body.token;
+    }
+
+    try {
+        let tokenInfo = verifyToken(token, config.token_secret);
+        let resultObject = await user.checkUserLoginInvalid(tokenInfo.username, tokenInfo.password);
+
+        if (!resultObject.isValid) {
+            return res.json({
+                code:-1,
+                message:'token invalid'
+            });
+        }
+
+        let updateResult = encyclopedia.alterPost(eid, title, describe, content, tokenInfo.uid, lang);
+
+        res.json({
+            code:0,
+            message:'alter successfully',
+            data:{
+                updateResult
+            }
+        });
     } catch (error) {
         return errorReturn(error, res);
     }

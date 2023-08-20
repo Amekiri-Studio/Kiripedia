@@ -107,11 +107,7 @@ router.post('/add',async function (req,res){
         });
     
     } catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 })
 
@@ -136,12 +132,7 @@ router.post('/login', async function (req, res) {
             }
             doLogin(username,password,req,res);
         } catch (err) {
-            console.log(err);
-            return res.json({
-                code:-1,
-                message:'error occupied',
-                data:err
-            });
+            return errorReturn(err, res);
         }
     }
 })
@@ -191,11 +182,7 @@ router.post("/remove", async function(req, res) {
         });
     }
     catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 });
 
@@ -226,11 +213,7 @@ router.get("/query/username", async function (req, res) {
         });
     }
     catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 })
 
@@ -244,11 +227,7 @@ router.get("/query/email", async function (req, res) {
         });
     }
     catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 })
 
@@ -310,11 +289,7 @@ router.post("/email/alter", async function (req, res) {
         })
 
     } catch (err) {
-        return res.json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
     
 })
@@ -360,11 +335,7 @@ router.post("/password/alter", async function (req, res) {
         });
 
     } catch (err) {
-        return res.status(500).json({
-            code:-1,
-            message:'error occupied',
-            data:err
-        });
+        return errorReturn(err, res);
     }
 })
 
@@ -492,32 +463,38 @@ router.post("/password/reset", async function (req, res) {
     let email = req.body.email;
     let authcode = req.body.authcode;
     let password = req.body.password;
-    if (!username) {
-        if (!username && !email) {
-            return res.json({
-                code:-1,
-                message:'no username or email provide'
-            });
+
+    try {
+        if (!username) {
+            if (!username && !email) {
+                return res.json({
+                    code:-1,
+                    message:'no username or email provide'
+                });
+            }
+            let userInfo = await user.getUserInfoByEmail(email);
+            if (userInfo.length == 0) {
+                return res.json({
+                    code:-1,
+                    message:'email does not exists'
+                });
+            }
+            verifyAuthCodeAndAlterPassword(userInfo[0].userid, userInfo[0].username, authcode, password, res);
         }
-        let exist = await user.queryExistsEmail(email);
-        if (!exist) {
-            return res.json({
-                code:-1,
-                message:'email does not exists'
-            });
+        else {
+            let userInfo = await user.getUserInfoByUsername(username);
+            if (userInfo.length == 0) {
+                return res.json({
+                    code:-1,
+                    message:'username does not exists'
+                });
+            }
+            verifyAuthCodeAndAlterPassword(userInfo[0].userid, userInfo[0].username, authcode, password, res);
         }
-        verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
+    } catch (error) {
+        return errorReturn(error, res);
     }
-    else {
-        let exist = user.queryExistsUsername(username);
-        if (!exist) {
-            return res.json({
-                code:-1,
-                message:'username does not exists'
-            });
-        }
-        verifyAuthCodeAndAlterPassword(result[0].userid, result[0].username, authcode, password, res);
-    }
+    
 })
 
 router.post("/verify/code", async function (req, res) {
@@ -823,6 +800,7 @@ async function verifyAuthCodeAndAlterPassword(uid ,username, authcode, password,
         }
 
         await user.alterUserInfo(uid, 'password', password, {username:username});
+        clearAuthCode(username);
         res.json({
             code:0,
             message:'reset password successfully'
@@ -831,21 +809,6 @@ async function verifyAuthCodeAndAlterPassword(uid ,username, authcode, password,
         return errorReturn(error, res);
     }
 }
-
-// function checkEmailOrUsernameExistsAndSendMessage(result, res) {
-//     if (JSON.stringify(result) === "[]" || JSON.stringify(result) === "{}") {
-//         res.json({
-//             code:0,
-//             result:false
-//         });
-//     }
-//     else {
-//         res.json({
-//             code:0,
-//             result:true
-//         });
-//     }
-// }
 
 function errorReturn(err ,res) {
     console.log(err);

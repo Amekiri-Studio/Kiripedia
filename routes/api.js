@@ -5,6 +5,7 @@ const { sendMail } = require("../utils/email");
 const { getNewVCodeForEmail, verifyVCodeForEmail } = require("../utils/verify/code");
 const { getEmailTemp } = require('../utils/emailtemp');
 var email_config = require("../config/email");
+const user = require("../database/user");
 
 // Root api path
 router.get('/',function (req,res) {
@@ -56,6 +57,37 @@ router.post('/email/verify/code', async function (req, res) {
         res.json(result);
     }
     catch (err) {
+        res.json({
+            code:-1,
+            message:'error occupied',
+            data:err
+        });
+    }
+})
+
+router.post('/email/verify/code/username', async function (req, res) {
+    let username = req.body.username;
+    
+    try {
+        let userInfo = await user.getUserInfoByUsername(username);
+        
+        if (userInfo.length == 0) {
+            return res.json({
+                code:-1,
+                message:'user does not exists'
+            });
+        }
+        email = userInfo[0].email;
+        let code = getNewVCodeForEmail(userInfo[0].email);
+
+        await sendMail(email,email_config.subject,getEmailTemp(code));
+        res.json({
+            code:0,
+            message:'email send successfully'
+        });
+    }
+    catch (err) {
+        console.log(err);
         res.json({
             code:-1,
             message:'error occupied',

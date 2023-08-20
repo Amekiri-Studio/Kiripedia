@@ -101,6 +101,30 @@
         }
       }
     },
+    "/api/email/verify/code/username": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/user/": {
       "get": {
         "description": "",
@@ -195,6 +219,12 @@
                 },
                 "code": {
                   "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
                 }
               }
             }
@@ -279,6 +309,12 @@
                 },
                 "code": {
                   "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                },
+                "password": {
+                  "example": "any"
                 }
               }
             }
@@ -309,6 +345,9 @@
                 },
                 "password": {
                   "example": "any"
+                },
+                "username": {
+                  "example": "any"
                 }
               }
             }
@@ -317,9 +356,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -340,10 +376,10 @@
                 "nickname": {
                   "example": "any"
                 },
-                "type": {
+                "username": {
                   "example": "any"
                 },
-                "image_path": {
+                "password": {
                   "example": "any"
                 }
               }
@@ -374,6 +410,12 @@
                   "example": "any"
                 },
                 "image_path": {
+                  "example": "any"
+                },
+                "username": {
+                  "example": "any"
+                },
+                "password": {
                   "example": "any"
                 }
               }
@@ -436,10 +478,10 @@
                 "code": {
                   "example": "any"
                 },
-                "type": {
+                "username": {
                   "example": "any"
                 },
-                "image_path": {
+                "password": {
                   "example": "any"
                 }
               }
@@ -466,10 +508,10 @@
                 "token": {
                   "example": "any"
                 },
-                "type": {
+                "username": {
                   "example": "any"
                 },
-                "image_path": {
+                "password": {
                   "example": "any"
                 }
               }
@@ -499,13 +541,7 @@
                 "code": {
                   "example": "any"
                 },
-                "type": {
-                  "example": "any"
-                },
-                "token": {
-                  "example": "any"
-                },
-                "image_path": {
+                "password": {
                   "example": "any"
                 }
               }
@@ -535,13 +571,10 @@
                 "code": {
                   "example": "any"
                 },
-                "type": {
+                "username": {
                   "example": "any"
                 },
-                "token": {
-                  "example": "any"
-                },
-                "image_path": {
+                "password": {
                   "example": "any"
                 }
               }
@@ -707,6 +740,65 @@
                   "example": "any"
                 },
                 "category": {
+                  "example": "any"
+                },
+                "token": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/post/alter": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                },
+                "eid": {
+                  "example": "any"
+                },
+                "title": {
+                  "example": "any"
+                },
+                "content": {
+                  "example": "any"
+                },
+                "describe": {
                   "example": "any"
                 },
                 "token": {
