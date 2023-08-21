@@ -199,6 +199,27 @@ async function removeUser(userid, option = {}) {
     }
 }
 
+async function getUserGroup(uid, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
+
+        const querySql = `
+            SELECT u.userid,ug.user_group_id,ug.user_group_name,ug.permission FROM user AS u
+            INNER JOIN user_groups AS ug ON u.user_belong_groups = ug.user_group_id
+            WHERE u.userid = ?
+        `;
+
+        const params = [uid];
+
+        const result = await mysql.query(connection, querySql, params);
+
+        mysql.connectionRelease(option, connection);
+
+        return result;
+    } catch (error) {
+        throw error;
+    }
+}
 module.exports = {
     createUser,
     queryExistsUsername,
@@ -209,5 +230,6 @@ module.exports = {
     checkUserLoginInvalid,
     alterUserInfo,
     queryUserId,
-    removeUser
+    removeUser,
+    getUserGroup
 }

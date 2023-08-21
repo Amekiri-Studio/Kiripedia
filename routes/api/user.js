@@ -99,6 +99,7 @@ router.post('/add',async function (req,res){
             code:0,
             message:'User create successfully',
             data: {
+                uid:result.insertId,
                 username:username,
                 nickname:nickname,
                 email:email,
@@ -782,7 +783,14 @@ async function doTokenCheckAndResponseToken(token, req, res) {
             });
         }
 
-        res.json(info);
+        res.json({
+            code:0,
+            message:'get successfully',
+            data:{
+                uid:info.uid,
+                username:info.username
+            }
+        });
     }
     catch (err) {
         return errorReturn(err, res);
