@@ -56,7 +56,9 @@ create table if not exists `user_groups` (
 create table if not exists `category` (
     `cat_id` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `cat_name` VARCHAR(100) NOT NULL,
+    `language`, INT UNSIGNED NOT NULL,
     `creater` INT UNSIGNED NOT NULL,
+    `upper_level_cat` INT UNSIGNED NOT NULL,
     PRIMARY KEY ( cat_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
