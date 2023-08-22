@@ -78,12 +78,12 @@ router.post("/create", async function (req, res) {
 
     try {
         let tokenInfo = verifyToken(token, config.token_secret);
-        let resultObject = await user.checkUserLoginInvalid(tokenInfo.username, tokenInfo.password);
+        let resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 1);
 
         if (!resultObject.isValid) {
             return res.json({
                 code:-1,
-                message:'token invalid'
+                message:resultObject.message
             });
         }
 
@@ -133,12 +133,12 @@ router.post('/alter', async function (req, res) {
 
     try {
         let tokenInfo = verifyToken(token, config.token_secret);
-        let resultObject = await user.checkUserLoginInvalid(tokenInfo.username, tokenInfo.password);
+        let resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 1);
 
         if (!resultObject.isValid) {
             return res.json({
                 code:-1,
-                message:'token invalid'
+                message:resultObject.message
             });
         }
 
@@ -154,6 +154,11 @@ router.post('/alter', async function (req, res) {
     } catch (error) {
         return errorReturn(error, res);
     }
+})
+
+router.post("/remove", async function (req, res) {
+    let eid = req.body.id;
+    let lang = req.body.lang;
 })
 
 function getBrowserFirstLanguage(req) {

@@ -210,11 +210,39 @@ async function alterPost(eid, title, describe, content, userid, lang, option = {
     }
 }
 
+async function removePost(eid, lang, option = {}) {
+    let connection;
+    try {
+        connection = option.connection || await mysql.getConnection();
+        let deleteSql, params = [];
+        if (!lang) {
+            deleteSql = `
+                DELETE FROM encyclopedia,encyclopedia_content
+                WHERE eid=?
+            `;
+            params = [eid];
+        }
+        else {
+            deleteSql = `
+                DELETE FROM encyclopedia_content
+                WHERE eid=? AND language=(SELECT language_id FROM language WHERE language_abbr=?)
+            `;
+            params = [eid, lang];
+        }
+
+        let result = await mysql.query(connection, deleteSql, params);
+        return result;
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     queryEncyclopediaById,
     queryEncyclopediaCount,
     queryEncyclopediaByKeywordWithRange,
     addPost,
     queryExistsPostOnLanguage,
-    alterPost
+    alterPost,
+    removePost
 }

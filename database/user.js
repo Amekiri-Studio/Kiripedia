@@ -220,6 +220,37 @@ async function getUserGroup(uid, option = {}) {
         throw error;
     }
 }
+
+async function checkUserLoginInvalidAndCheckPermission(username, password_hash, need_permission, option = {}) {
+    try {
+        const connection = option.connection || await mysql.getConnection();
+
+        let userObject = await checkUserLoginInvalid(username, password_hash, {connection, release:false});
+
+        if (!userObject.isValid) {
+            return {isValid: false, message:'token invalid'};
+        }
+
+        let userInfo = userObject.result[0];
+
+        if (userInfo.status === -2) {
+            return {isValid: false, message:'account is banned'};
+        }
+
+        let userGroups = await getUserGroup(userInfo.userid, {connection, release:false});
+
+        if (userGroups[0].permission < need_permission) {
+            return {isValid: false, message:'no permission on your user group'};
+        }
+
+        connection.release();
+
+        return {isValid:true, message:'success', userInfo: userInfo, group: userGroups[0]};
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     createUser,
     queryExistsUsername,
@@ -231,5 +262,6 @@ module.exports = {
     alterUserInfo,
     queryUserId,
     removeUser,
-    getUserGroup
+    getUserGroup,
+    checkUserLoginInvalidAndCheckPermission
 }
