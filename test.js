@@ -1,5 +1,5 @@
-const test = require('./database/user');
+const test = require('./database/encyclopedia');
 
-test.getUserGroup(12).then(result => {
+test.checkPostPremission(1).then( (result) => {
     console.log(result);
 });

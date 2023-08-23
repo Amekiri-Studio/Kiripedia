@@ -116,8 +116,8 @@ router.post("/create", async function (req, res) {
 })
 
 router.post('/alter', async function (req, res) {
-    let lang = req.body.id;
-    let eid = req.body.eid;
+    let lang = req.body.lang;
+    let eid = req.body.id;
     let title = req.body.title;
     let content = req.body.content;
     let describe = req.body.describe;
@@ -129,11 +129,26 @@ router.post('/alter', async function (req, res) {
 
     if (!token) {
         token = req.body.token;
+        if (!token) {
+            return res.json({
+                code:-1,
+                message:'no token provide'
+            });
+        }
     }
 
     try {
         let tokenInfo = verifyToken(token, config.token_secret);
-        let resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 1);
+        let permission = encyclopedia.checkPostPremission(eid);
+        let resultObject;
+
+        if (permission == 1) {
+            resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 1);
+        }
+
+        else {
+            resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 2);
+        }
 
         if (!resultObject.isValid) {
             return res.json({
@@ -142,7 +157,7 @@ router.post('/alter', async function (req, res) {
             });
         }
 
-        let updateResult = encyclopedia.alterPost(eid, title, describe, content, tokenInfo.uid, lang);
+        let updateResult = await encyclopedia.alterPost(eid, title, describe, content, tokenInfo.uid, lang);
 
         res.json({
             code:0,

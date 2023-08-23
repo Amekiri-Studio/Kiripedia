@@ -231,7 +231,38 @@ async function removePost(eid, lang, option = {}) {
         }
 
         let result = await mysql.query(connection, deleteSql, params);
+        mysql.connectionRelease(option, connection);
         return result;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function checkPostPremission(eid, lang, option = {}) {
+    let connection;
+    try {
+        connection = option.connection || await mysql.getConnection();
+        let querySql, params = [];
+
+        if (!lang) {
+            querySql = `
+                SELECT permission FROM encyclopedia
+                WHERE eid=?
+            `;
+            params = [eid];
+        }
+        else {
+            querySql = `
+                SELECT permission FROM encyclopedia_content
+                WHERE eid=?
+                AND language=(SELECT * FROM language WHERE language_abbr=?)
+            `;
+            params = [eid, lang];
+        }
+
+        let result = await mysql.query(connection, querySql, params);
+        mysql.connectionRelease(option, connection);
+        return result[0].permission;
     } catch (error) {
         throw error;
     }
@@ -244,5 +275,6 @@ module.exports = {
     addPost,
     queryExistsPostOnLanguage,
     alterPost,
-    removePost
+    removePost,
+    checkPostPremission
 }
