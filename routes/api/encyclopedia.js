@@ -130,10 +130,7 @@ router.post('/alter', async function (req, res) {
     if (!token) {
         token = req.body.token;
         if (!token) {
-            return res.json({
-                code:-1,
-                message:'no token provide'
-            });
+            return messageShowNoToken(res);
         }
     }
 

@@ -106,8 +106,8 @@ async function addPost(eid, title, cat, describe, content, userid, lang, option 
         `;
 
         let addSql = `
-            INSERT INTO encyclopedia_content(eid, title, \`describe\`, createrid, lasteditorid, content, language, permission) 
-            VALUES(?, ?, ?, ?, ?, ?, (SELECT language_id FROM language WHERE language_abbr = ?), 1)
+            INSERT INTO encyclopedia_content(eid, title, \`describe\`, createrid, lasteditorid, content, language) 
+            VALUES(?, ?, ?, ?, ?, ?, (SELECT language_id FROM language WHERE language_abbr = ?))
         `;
 
         let addContributeSql = `

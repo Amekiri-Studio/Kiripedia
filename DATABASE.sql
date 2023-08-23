@@ -32,8 +32,7 @@ create table if not exists `encyclopedia_content` (
     `create_date` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `createrid` INT UNSIGNED NOT NULL,
     `lasteditorid` INT UNSIGNED NOT NULL,
-    `content` LONGTEXT,
-    `permission` TINYINT NOT NULL,
+    `content` LONGTEXT
     PRIMARY KEY ( e_content_id )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
