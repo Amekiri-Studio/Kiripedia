@@ -18,7 +18,7 @@ create table if not exists `user`(
 create table if not exists `encyclopedia` (
     `eid` INT UNSIGNED AUTO_INCREMENT NOT NULL,
     `category` INT UNSIGNED,
-    `permission` TINYINT NOT NULL,
+    `permission` TINYINT NOT NULL DEFAULT 1,
     `redirect_link` VARCHAR(100),
     PRIMARY KEY ( eid )
 )ENGINE=InnoDB DEFAULT CHARSET=utf8;
