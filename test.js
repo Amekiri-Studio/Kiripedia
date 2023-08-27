@@ -1,5 +1,5 @@
-const test = require('./database/encyclopedia');
+const test = require('./database/contributor');
 
-test.checkPostPremission(1).then( (result) => {
+test.getContributor(1, 'zh-cn').then(result => {
     console.log(result);
 });

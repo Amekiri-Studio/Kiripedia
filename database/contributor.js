@@ -7,8 +7,8 @@ async function getContributor(eid, lang, option = {})  {
         const querySql = `
             SELECT * FROM
             encyclopedia_contribution AS econtr
-            INNER JOIN encyclopedia AS e ON e.eid=ecountr.eid
-            INNER JOIN encyclopedia_content AS ec ON ecountr.eid=ec.eid
+            INNER JOIN encyclopedia AS e ON e.eid=econtr.eid
+            INNER JOIN encyclopedia_content AS ec ON econtr.eid=ec.eid
             WHERE e.eid = ?
             AND ec.language = (SELECT language_id FROM language WHERE language_abbr = ?)
         `;
