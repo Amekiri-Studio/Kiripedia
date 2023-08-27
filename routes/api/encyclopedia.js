@@ -141,7 +141,7 @@ router.post('/alter', async function (req, res) {
         if (permission == 1) {
             resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 1);
         }
-
+        
         else {
             resultObject = await user.checkUserLoginInvalidAndCheckPermission(tokenInfo.username, tokenInfo.password, 2);
         }
