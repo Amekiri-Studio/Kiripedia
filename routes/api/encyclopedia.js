@@ -103,7 +103,6 @@ router.post("/create", async function (req, res) {
             code:0,
             message:'post create successfully',
             data:{
-                id:insertResult.insertId,
                 title:title,
                 describe:describe,
                 category:category
