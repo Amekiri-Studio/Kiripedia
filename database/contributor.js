@@ -23,6 +23,29 @@ async function getContributor(eid, lang, option = {})  {
     }
 }
 
+function checkContribution(contru_list, userid) {
+    let data_length = contru_list.length;
+    let count = 0;
+    for (let i = 0;i < data_length;i++) {
+        if (contru_list[i].userid === userid) {
+            count++;
+        }
+    }
+
+    if (data_length === count) {
+        if (contru_list[0].permission === 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    else {
+        return false;
+    }
+}
+
 module.exports = {
-    getContributor
+    getContributor,
+    checkContribution
 }

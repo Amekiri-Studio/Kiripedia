@@ -356,9 +356,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -789,10 +786,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
+                "lang": {
                   "example": "any"
                 },
-                "eid": {
+                "id": {
                   "example": "any"
                 },
                 "title": {
@@ -809,6 +806,92 @@
                 }
               }
             }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/post/remove": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": "any"
+                },
+                "lang": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ctb/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/ctb/post/get": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "eid",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "uid",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ctb/testapi": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "eid",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
